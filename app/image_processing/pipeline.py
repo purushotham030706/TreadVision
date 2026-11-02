@@ -130,25 +130,28 @@ class ImageProcessingPipeline:
         glcm_homogeneity = features_dict["texture"]["homogeneity"]
         solidity = features_dict["shape"]["solidity"]
 
+        # Calibrated computer vision metrics for tyre wear assessment
+        edge_norm = min(1.0, edge_density / 0.030)
+        contrast_norm = min(1.0, max(0.0, (glcm_contrast - 2.0) / 20.0))
+        homog_norm = min(1.0, max(0.0, (1.0 - glcm_homogeneity - 0.20) / 0.30))
+
         # Tread pattern integrity heuristic (0-100%)
-        # Sharp grooves + high contrast + defined edges indicate high pattern integrity
-        integrity_score = min(100.0, max(10.0, (
-            (edge_density / 0.12) * 35.0 +
-            (min(glcm_contrast, 8.0) / 8.0) * 35.0 +
-            (1.0 - glcm_homogeneity) * 30.0
+        # Coherent structural grooves + physical contrast + high texture variation
+        integrity_score = min(98.0, max(12.0, (
+            edge_norm * 45.0 + contrast_norm * 40.0 + homog_norm * 15.0
         )))
 
-        # Groove visibility index
-        groove_visibility = min(100.0, max(10.0, (
-            (features_dict["edge"]["horizontal_edge_density"] / 0.06) * 50.0 +
-            (features_dict["edge"]["vertical_edge_density"] / 0.06) * 50.0
+        # Groove visibility index: measures continuous structural channel presence
+        groove_visibility = min(98.0, max(10.0, (
+            (features_dict["edge"]["horizontal_edge_density"] / 0.020) * 50.0 +
+            (features_dict["edge"]["vertical_edge_density"] / 0.015) * 50.0
         )))
 
-        # Edge definition score
-        edge_definition = min(100.0, max(15.0, (edge_density / 0.10) * 100.0))
+        # Edge definition score: measures boundary sharpness of tread elements
+        edge_definition = min(98.0, max(10.0, edge_norm * 100.0))
 
-        # Texture condition score (higher contrast & lower homogeneity = better condition)
-        texture_condition = min(100.0, max(15.0, (1.0 - glcm_homogeneity) * 100.0))
+        # Texture condition score (higher relief contrast & distinct sipes = higher score)
+        texture_condition = min(98.0, max(12.0, (contrast_norm * 0.70 + homog_norm * 0.30) * 100.0))
 
         metrics = {
             "pattern_integrity_pct": round(integrity_score, 1),

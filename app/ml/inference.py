@@ -63,17 +63,18 @@ class WearInferenceEngine:
 
                 pred_idx = self.model.predict(feat_scaled)[0]
                 if self.label_encoder:
-                    pred_class = self.label_encoder.inverse_transform([pred_idx])[0]
+                    pred_class = str(self.label_encoder.inverse_transform([pred_idx])[0])
                 else:
-                    pred_class = WEAR_CLASSES[pred_idx]
+                    pred_class = str(WEAR_CLASSES[pred_idx])
 
                 # Probabilities
                 probabilities = {}
                 confidence = 0.85
                 if hasattr(self.model, "predict_proba"):
                     probs = self.model.predict_proba(feat_scaled)[0]
-                    for idx, c_name in enumerate(WEAR_CLASSES):
-                        probabilities[c_name] = round(float(probs[idx]), 3)
+                    classes = list(self.label_encoder.classes_) if self.label_encoder else WEAR_CLASSES
+                    for idx, c_name in enumerate(classes):
+                        probabilities[str(c_name)] = round(float(probs[idx]), 3)
                     confidence = float(np.max(probs))
 
                 return {
@@ -99,22 +100,24 @@ class WearInferenceEngine:
             glcm_contrast = feature_dict.get("texture", {}).get("contrast", 2.0)
             glcm_homogeneity = feature_dict.get("texture", {}).get("homogeneity", 0.5)
 
-        # High edge density + high contrast + low homogeneity = Good
-        # Low edge density + low contrast + high homogeneity = Worn
-        wear_score = (edge_density / 0.08) * 0.45 + (glcm_contrast / 5.0) * 0.35 + (1.0 - glcm_homogeneity) * 0.20
+        # Calibrated computer vision feature rule engine
+        edge_norm = min(1.0, edge_density / 0.025)
+        contrast_norm = min(1.0, max(0.0, (glcm_contrast - 2.0) / 18.0))
+        texture_norm = min(1.0, max(0.0, (1.0 - glcm_homogeneity - 0.20) / 0.30))
+        wear_score = 0.45 * edge_norm + 0.40 * contrast_norm + 0.15 * texture_norm
 
-        if wear_score >= 0.70:
+        if wear_score >= 0.55:
             pred_class = "good"
-            conf = min(0.92, 0.75 + (wear_score - 0.70) * 0.5)
-            probs = {"good": round(conf, 2), "moderate": round(1.0 - conf - 0.05, 2), "worn": 0.05}
-        elif wear_score >= 0.40:
+            conf = min(0.95, 0.75 + (wear_score - 0.55) * 0.4)
+            probs = {"good": round(conf, 2), "moderate": round(max(0.01, 1.0 - conf - 0.04), 2), "worn": 0.04}
+        elif wear_score >= 0.24:
             pred_class = "moderate"
-            conf = 0.78
-            probs = {"good": 0.15, "moderate": 0.78, "worn": 0.07}
+            conf = 0.80
+            probs = {"good": 0.12, "moderate": 0.80, "worn": 0.08}
         else:
             pred_class = "worn"
-            conf = min(0.94, 0.75 + (0.40 - wear_score) * 0.6)
-            probs = {"good": 0.05, "moderate": round(1.0 - conf - 0.05, 2), "worn": round(conf, 2)}
+            conf = min(0.95, 0.78 + (0.24 - wear_score) * 0.7)
+            probs = {"good": 0.03, "moderate": round(max(0.01, 1.0 - conf - 0.03), 2), "worn": round(conf, 2)}
 
         return {
             "predicted_class": pred_class,

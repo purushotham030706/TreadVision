@@ -1,34 +1,39 @@
 """
-TreadVision: Automotive Engineering & Scientific UI Theme
+TreadVision: Automotive Engineering & Scientific Dark UI Theme
 Color Palette:
-  Main Background:    #F4F3EF (Warm off-white)
-  Primary Surface:    #FFFFFF
-  Secondary Surface:  #ECEAE5
-  Primary Text:       #171717
-  Secondary Text:     #696762
-  Borders:            #D8D5CE
-  Primary Accent:     #8F1D2C (Deep automotive red, used with restraint)
-  Dark Technical:     #1E1E1C
+  Main Background:    #0F1012
+  Primary Surface:    #17191C
+  Secondary Surface:  #1E2024
+  Elevated Surface:   #24272B
+  Primary Text:       #F2F2F0
+  Secondary Text:     #A7A8A5
+  Muted Text:         #777A78
+  Borders:            #34373B
+  Accent:             #A51F32
+  Accent Hover:       #C12A3E
+  Technical Canvas:   #0B0C0E
 """
 import streamlit as st
 
 
 def apply_theme():
-    """Inject sophisticated automotive engineering CSS stylesheet."""
+    """Inject sophisticated dark automotive engineering CSS stylesheet."""
     st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap');
 
-    /* Global Color System & Typography */
     :root {
-        --bg-main: #F4F3EF;
-        --surface-primary: #FFFFFF;
-        --surface-secondary: #ECEAE5;
-        --text-primary: #171717;
-        --text-secondary: #696762;
-        --border-color: #D8D5CE;
-        --accent-red: #8F1D2C;
-        --surface-dark: #1E1E1C;
+        --bg-main: #0F1012;
+        --surface-primary: #17191C;
+        --surface-secondary: #1E2024;
+        --surface-elevated: #24272B;
+        --text-primary: #F2F2F0;
+        --text-secondary: #A7A8A5;
+        --text-muted: #777A78;
+        --border-color: #34373B;
+        --accent-red: #A51F32;
+        --accent-hover: #C12A3E;
+        --canvas-technical: #0B0C0E;
     }
 
     /* Base Body & App Container */
@@ -38,7 +43,7 @@ def apply_theme():
         font-family: 'IBM Plex Sans', 'Inter', -apple-system, sans-serif !important;
     }
 
-    /* Hide Default Streamlit Chrome & Decoration */
+    /* Hide Default Streamlit Chrome */
     #MainMenu { visibility: hidden !important; }
     footer { visibility: hidden !important; }
     header[data-testid="stHeader"] {
@@ -52,31 +57,31 @@ def apply_theme():
         font-family: 'IBM Plex Sans', sans-serif !important;
         color: var(--text-primary) !important;
         font-weight: 600 !important;
-        letter-spacing: -0.02em !important;
+        letter-spacing: -0.01em !important;
     }
 
     h1 {
-        font-size: 2.1rem !important;
+        font-size: 1.95rem !important;
         line-height: 1.25 !important;
         margin-bottom: 0.35rem !important;
     }
 
     h2 {
-        font-size: 1.45rem !important;
+        font-size: 1.35rem !important;
         line-height: 1.3 !important;
-        margin-top: 1.2rem !important;
-        margin-bottom: 0.5rem !important;
+        margin-top: 1.1rem !important;
+        margin-bottom: 0.45rem !important;
     }
 
     h3 {
-        font-size: 1.15rem !important;
+        font-size: 1.1rem !important;
         font-weight: 600 !important;
-        margin-bottom: 0.4rem !important;
+        margin-bottom: 0.35rem !important;
     }
 
     p, span, label, div {
         color: var(--text-primary);
-        font-size: 0.93rem;
+        font-size: 0.92rem;
     }
 
     code, pre, .tv-mono {
@@ -96,81 +101,39 @@ def apply_theme():
         padding-right: 1.25rem !important;
     }
 
-    /* Header Nav & Top Banner */
-    .tv-masthead {
-        border-bottom: 1px solid var(--border-color);
-        padding-bottom: 1.25rem;
-        margin-bottom: 2rem;
-    }
-
-    .tv-masthead-title {
-        font-size: 1.15rem;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: var(--text-primary);
-        margin: 0;
-    }
-
-    .tv-masthead-sub {
-        font-size: 0.78rem;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: var(--accent-red);
-        font-weight: 600;
-        margin-top: 0.2rem;
-    }
-
-    /* Editorial Cards */
+    /* Technical Cards */
     .tv-card {
         background-color: var(--surface-primary);
         border: 1px solid var(--border-color);
         border-radius: 4px;
-        padding: 24px;
+        padding: 22px;
         margin-bottom: 16px;
     }
 
     .tv-card-header {
-        font-size: 0.85rem;
+        font-size: 0.76rem;
         font-weight: 700;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        color: var(--text-secondary);
-        margin-bottom: 8px;
+        color: var(--text-muted);
+        margin-bottom: 6px;
     }
 
     .tv-card-title {
-        font-size: 1.25rem;
+        font-size: 1.15rem;
         font-weight: 600;
         color: var(--text-primary);
         margin-bottom: 8px;
     }
 
     .tv-card-desc {
-        font-size: 0.9rem;
+        font-size: 0.88rem;
         color: var(--text-secondary);
         line-height: 1.55;
-        margin-bottom: 18px;
+        margin-bottom: 16px;
     }
 
-    /* Dark Technical Surface (for imaging stages & raw technical inspect) */
-    .tv-dark-panel {
-        background-color: var(--surface-dark);
-        border: 1px solid #333330;
-        border-radius: 4px;
-        padding: 20px;
-        color: #ECEAE5;
-    }
-
-    .tv-dark-panel h1, .tv-dark-panel h2, .tv-dark-panel h3, .tv-dark-panel h4 {
-        color: #FFFFFF !important;
-    }
-
-    .tv-dark-panel p, .tv-dark-panel span {
-        color: #C5C3BC !important;
-    }
-
-    /* Technical Numbered Workflows */
+    /* Technical Numbered Steps */
     .tv-section-num {
         font-family: 'IBM Plex Mono', monospace;
         font-size: 0.95rem;
@@ -180,7 +143,7 @@ def apply_theme():
         margin-bottom: 4px;
     }
 
-    /* Technical Badges & Tags */
+    /* Badges & Technical Tags */
     .tv-tag {
         display: inline-block;
         font-family: 'IBM Plex Mono', monospace;
@@ -197,52 +160,8 @@ def apply_theme():
 
     .tv-tag-accent {
         border-color: var(--accent-red);
-        color: var(--accent-red);
-        background: rgba(143, 29, 44, 0.05);
-    }
-
-    .tv-tag-dark {
-        background: #2A2A28;
-        border-color: #444440;
         color: #FFFFFF;
-    }
-
-    /* Clean Technical Tables */
-    .tv-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.88rem;
-        background: var(--surface-primary);
-        border: 1px solid var(--border-color);
-        border-radius: 4px;
-        overflow: hidden;
-    }
-
-    .tv-table th {
-        text-align: left;
-        padding: 10px 14px;
-        background: var(--surface-secondary);
-        font-size: 0.76rem;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-        color: var(--text-secondary);
-        border-bottom: 1px solid var(--border-color);
-        font-weight: 600;
-    }
-
-    .tv-table td {
-        padding: 10px 14px;
-        border-bottom: 1px solid var(--border-color);
-        color: var(--text-primary);
-    }
-
-    .tv-table tr:last-child td {
-        border-bottom: none;
-    }
-
-    .tv-table td.num {
-        font-family: 'IBM Plex Mono', monospace;
-        font-weight: 500;
+        background: var(--accent-red);
     }
 
     /* Scientific / Forensic Disclaimer Notice */
@@ -262,27 +181,85 @@ def apply_theme():
 
     .tv-notice-title {
         font-weight: 700;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.06em;
         text-transform: uppercase;
         color: var(--text-primary);
         margin-bottom: 4px;
         font-size: 0.8rem;
     }
 
-    /* Streamlit Widget Overrides */
-    div[data-testid="stRadio"] > label {
-        font-size: 0.82rem !important;
+    /* Streamlit Widget Overrides — Explicit High Contrast Dark Theme */
+    
+    /* 1. Labels */
+    .stSelectbox label, .stTextInput label, .stSlider label, .stRadio label, .stFileUploader label {
+        color: var(--text-secondary) !important;
+        font-size: 0.8rem !important;
         font-weight: 600 !important;
         letter-spacing: 0.04em !important;
         text-transform: uppercase !important;
-        color: var(--text-secondary) !important;
     }
 
-    div[data-testid="stRadio"] div[role="radiogroup"] label {
-        background: transparent !important;
+    /* 2. BaseWeb Selectbox & Dropdowns (No Black-on-Black) */
+    div[data-baseweb="select"] {
+        background-color: var(--surface-primary) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 4px !important;
     }
 
-    /* Primary & Standard Buttons */
+    div[data-baseweb="select"] > div {
+        background-color: var(--surface-primary) !important;
+        color: var(--text-primary) !important;
+        border: none !important;
+    }
+
+    div[data-baseweb="select"] span {
+        color: var(--text-primary) !important;
+    }
+
+    div[data-baseweb="select"] svg {
+        fill: var(--text-secondary) !important;
+    }
+
+    /* Dropdown Popover Menus */
+    div[data-baseweb="popover"], div[data-baseweb="popover"] > div {
+        background-color: var(--surface-secondary) !important;
+        border: 1px solid var(--border-color) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    ul[role="listbox"] {
+        background-color: var(--surface-secondary) !important;
+    }
+
+    li[role="option"] {
+        background-color: var(--surface-secondary) !important;
+        color: var(--text-primary) !important;
+        font-size: 0.88rem !important;
+    }
+
+    li[role="option"]:hover, li[role="option"][aria-selected="true"] {
+        background-color: var(--surface-elevated) !important;
+        color: #FFFFFF !important;
+    }
+
+    /* 3. Text Inputs & Search */
+    div[data-baseweb="input"] {
+        background-color: var(--surface-primary) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 4px !important;
+    }
+
+    div[data-baseweb="input"] input {
+        background-color: var(--surface-primary) !important;
+        color: var(--text-primary) !important;
+        font-size: 0.88rem !important;
+    }
+
+    div[data-baseweb="input"] input::placeholder {
+        color: var(--text-muted) !important;
+    }
+
+    /* 4. Buttons */
     button[kind="primary"], .stButton > button[kind="primary"] {
         background-color: var(--accent-red) !important;
         color: #FFFFFF !important;
@@ -295,12 +272,11 @@ def apply_theme():
         text-transform: uppercase !important;
         padding: 8px 18px !important;
         box-shadow: none !important;
-        transition: background-color 0.15s ease, border-color 0.15s ease !important;
     }
 
     button[kind="primary"]:hover, .stButton > button[kind="primary"]:hover {
-        background-color: #741623 !important;
-        border-color: #741623 !important;
+        background-color: var(--accent-hover) !important;
+        border-color: var(--accent-hover) !important;
     }
 
     button[kind="secondary"], .stButton > button[kind="secondary"], .stButton > button {
@@ -311,27 +287,18 @@ def apply_theme():
         font-family: 'IBM Plex Sans', sans-serif !important;
         font-size: 0.82rem !important;
         font-weight: 600 !important;
-        letter-spacing: 0.04em !important;
+        letter-spacing: 0.05em !important;
         text-transform: uppercase !important;
         padding: 8px 18px !important;
         box-shadow: none !important;
-        transition: background-color 0.15s ease, border-color 0.15s ease !important;
     }
 
     button[kind="secondary"]:hover, .stButton > button:hover {
         background-color: var(--surface-secondary) !important;
-        border-color: #B5B2AA !important;
+        border-color: #4A4E53 !important;
     }
 
-    /* Inputs, Selectboxes, File Upload */
-    div[data-baseweb="select"] > div,
-    div[data-baseweb="input"] > div {
-        background-color: var(--surface-primary) !important;
-        border-color: var(--border-color) !important;
-        border-radius: 4px !important;
-        color: var(--text-primary) !important;
-    }
-
+    /* 5. File Uploader */
     div[data-testid="stFileUploader"] {
         background-color: var(--surface-primary) !important;
         border: 1px dashed var(--border-color) !important;
@@ -343,12 +310,30 @@ def apply_theme():
         border-color: var(--accent-red) !important;
     }
 
-    /* Tabs Styling */
+    div[data-testid="stFileUploader"] section {
+        background-color: var(--surface-primary) !important;
+        color: var(--text-primary) !important;
+    }
+
+    div[data-testid="stFileUploader"] span, div[data-testid="stFileUploader"] small {
+        color: var(--text-secondary) !important;
+    }
+
+    /* 6. Radio & Checkbox */
+    div[data-testid="stRadio"] div[role="radiogroup"] label span {
+        color: var(--text-primary) !important;
+    }
+
+    div[data-testid="stCheckbox"] label span {
+        color: var(--text-primary) !important;
+    }
+
+    /* 7. Tabs */
     button[data-baseweb="tab"] {
         font-family: 'IBM Plex Sans', sans-serif !important;
-        font-size: 0.84rem !important;
+        font-size: 0.82rem !important;
         font-weight: 600 !important;
-        letter-spacing: 0.04em !important;
+        letter-spacing: 0.05em !important;
         text-transform: uppercase !important;
         color: var(--text-secondary) !important;
         background-color: transparent !important;
@@ -357,14 +342,41 @@ def apply_theme():
     }
 
     button[data-baseweb="tab"][aria-selected="true"] {
-        color: var(--accent-red) !important;
+        color: var(--text-primary) !important;
         border-bottom: 2px solid var(--accent-red) !important;
     }
 
-    /* Metric Display */
+    /* 8. DataFrames & Tables */
+    div[data-testid="stDataFrame"] {
+        background-color: var(--surface-primary) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 4px !important;
+    }
+
+    div[data-testid="stDataFrame"] table {
+        color: var(--text-primary) !important;
+    }
+
+    /* 9. Expanders */
+    div[data-testid="stExpander"] {
+        background-color: var(--surface-primary) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 4px !important;
+    }
+
+    div[data-testid="stExpander"] summary {
+        color: var(--text-primary) !important;
+        font-weight: 600 !important;
+    }
+
+    div[data-testid="stExpander"] summary:hover {
+        color: #FFFFFF !important;
+    }
+
+    /* 10. Metrics */
     div[data-testid="stMetricValue"] {
         font-family: 'IBM Plex Mono', monospace !important;
-        font-size: 1.6rem !important;
+        font-size: 1.55rem !important;
         font-weight: 600 !important;
         color: var(--text-primary) !important;
     }
@@ -377,16 +389,35 @@ def apply_theme():
         color: var(--text-secondary) !important;
     }
 
-    /* Progress bar */
+    /* Sliders */
+    div[data-testid="stSlider"] div[role="slider"] {
+        background-color: var(--accent-red) !important;
+    }
+
+    /* Progress Bar */
     div[data-testid="stProgressBar"] > div > div {
         background-color: var(--accent-red) !important;
+    }
+
+    /* Technical Canvas Image Containers */
+    div[data-testid="stImage"] {
+        background-color: var(--canvas-technical) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 4px !important;
+        padding: 4px !important;
+    }
+
+    div[data-testid="stImage"] figcaption {
+        color: var(--text-secondary) !important;
+        font-size: 0.76rem !important;
+        margin-top: 4px !important;
     }
 
     /* Clean Technical Dividers */
     hr {
         border: none !important;
         border-top: 1px solid var(--border-color) !important;
-        margin: 24px 0 !important;
+        margin: 20px 0 !important;
     }
     </style>
     """, unsafe_allow_html=True)

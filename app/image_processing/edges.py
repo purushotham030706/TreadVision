@@ -41,6 +41,24 @@ def detect_laplacian_edges(image: np.ndarray, ksize: int = 3) -> np.ndarray:
     return cv2.normalize(np.abs(lap), None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
 
 
+def filter_structural_edges(edge_map: np.ndarray, min_size: int = 12) -> np.ndarray:
+    """
+    Eliminates isolated speckle noise and sensor artifacts while preserving
+    continuous groove boundaries and coherent siping contours.
+    """
+    if np.sum(edge_map > 0) == 0:
+        return edge_map
+    num_labels, labels, stats, _ = cv2.connectedComponentsWithStats((edge_map > 0).astype(np.uint8))
+    structural = np.zeros_like(edge_map)
+    for i in range(1, num_labels):
+        w = stats[i, cv2.CC_STAT_WIDTH]
+        h = stats[i, cv2.CC_STAT_HEIGHT]
+        area = stats[i, cv2.CC_STAT_AREA]
+        if max(w, h) >= min_size or area >= min_size:
+            structural[labels == i] = 255
+    return structural
+
+
 def extract_edge_features(
     edge_map: np.ndarray,
     grad_x: Optional[np.ndarray] = None,
@@ -48,7 +66,7 @@ def extract_edge_features(
 ) -> Dict[str, float]:
     """
     Extract quantifiable edge descriptors:
-    - total_edge_density: total edge pixels / total pixel count
+    - total_edge_density: structural groove edge pixels / total pixel count
     - horizontal_edge_density: circumferential grooves oriented horizontally (or along tyre circumference)
     - vertical_edge_density: lateral blocks/sipes oriented vertically
     - edge_orientation_mean: average orientation angle in degrees
@@ -57,15 +75,18 @@ def extract_edge_features(
     h, w = edge_map.shape[:2]
     total_pixels = float(h * w)
 
-    edge_pixels = np.sum(edge_map > 0)
+    # Filter out isolated sensor noise to focus strictly on coherent groove structures
+    structural_edges = filter_structural_edges(edge_map, min_size=12)
+
+    edge_pixels = np.sum(structural_edges > 0)
     total_edge_density = float(edge_pixels / total_pixels)
 
     if grad_x is None or grad_y is None:
-        grad_x = cv2.Sobel(edge_map, cv2.CV_64F, 1, 0, ksize=3)
-        grad_y = cv2.Sobel(edge_map, cv2.CV_64F, 0, 1, ksize=3)
+        grad_x = cv2.Sobel(structural_edges, cv2.CV_64F, 1, 0, ksize=3)
+        grad_y = cv2.Sobel(structural_edges, cv2.CV_64F, 0, 1, ksize=3)
 
     # Compute orientation for edge pixels only
-    edge_mask = edge_map > 0
+    edge_mask = structural_edges > 0
     if np.any(edge_mask):
         gx = grad_x[edge_mask]
         gy = grad_y[edge_mask]

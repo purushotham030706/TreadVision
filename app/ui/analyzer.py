@@ -8,7 +8,7 @@ import numpy as np
 import cv2
 from PIL import Image
 
-from app.config import WEAR_DATA_DIR
+from app.config import WEAR_DATA_DIR, CANNY_LOW_THRESHOLD, CANNY_HIGH_THRESHOLD
 from app.image_processing.pipeline import ImageProcessingPipeline
 from app.ml.inference import WearInferenceEngine
 from app.ui.components import render_header, render_feature_table
@@ -18,7 +18,7 @@ def render_analyzer():
     """Render the Tyre Tread Analyzer workstation."""
     render_header(
         "TREAD ANALYZER",
-        "Assess the condition and structural characteristics of a tyre tread from an image."
+        "Assess the condition, physical relief, and structural characteristics of a tyre tread from an image."
     )
 
     # Workstation Two-Column Input Layout
@@ -26,7 +26,7 @@ def render_analyzer():
 
     with col_input:
         st.markdown("""
-        <div style="font-size: 0.76rem; letter-spacing: 0.08em; text-transform: uppercase; color: #171717; font-weight: 700; margin-bottom: 8px;">
+        <div style="font-size: 0.76rem; letter-spacing: 0.08em; text-transform: uppercase; color: #F2F2F0; font-weight: 700; margin-bottom: 8px;">
             TREAD IMAGE INPUT
         </div>
         """, unsafe_allow_html=True)
@@ -67,7 +67,7 @@ def render_analyzer():
 
     with col_ctrl:
         st.markdown("""
-        <div style="font-size: 0.76rem; letter-spacing: 0.08em; text-transform: uppercase; color: #171717; font-weight: 700; margin-bottom: 8px;">
+        <div style="font-size: 0.76rem; letter-spacing: 0.08em; text-transform: uppercase; color: #F2F2F0; font-weight: 700; margin-bottom: 8px;">
             PIPELINE CONTROLS
         </div>
         """, unsafe_allow_html=True)
@@ -75,8 +75,8 @@ def render_analyzer():
         noise_filter = st.selectbox("Noise Reduction Filter:", ["bilateral", "gaussian", "median"], index=0)
         contrast_opt = st.selectbox("Contrast Enhancement:", ["clahe", "histeq"], index=0)
         seg_method = st.selectbox("Tread Segmentation:", ["otsu", "adaptive"], index=0)
-        canny_low = st.slider("Canny Low Threshold:", 10, 100, 50, step=5)
-        canny_high = st.slider("Canny High Threshold:", 100, 250, 150, step=5)
+        canny_low = st.slider("Canny Low Threshold:", 10, 100, CANNY_LOW_THRESHOLD, step=5)
+        canny_high = st.slider("Canny High Threshold:", 50, 200, CANNY_HIGH_THRESHOLD, step=5)
 
     if image_to_process is None:
         st.markdown("""
@@ -102,7 +102,7 @@ def render_analyzer():
 
     if not result.success:
         st.markdown(f"""
-        <div class="tv-notice" style="border-left-color: #8F1D2C;">
+        <div class="tv-notice" style="border-left-color: #A51F32;">
             <div class="tv-notice-title">ANALYSIS UNAVAILABLE</div>
             {result.error_message}. Ensure the input contains an unobstructed tread surface.
         </div>
@@ -129,24 +129,24 @@ def render_analyzer():
 
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown(f"""
-    <div style="background: #FFFFFF; border: 1px solid #D8D5CE; border-radius: 4px; padding: 24px; margin-bottom: 24px;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; border-bottom: 1px solid #D8D5CE; padding-bottom: 14px; margin-bottom: 16px;">
+    <div style="background: #17191C; border: 1px solid #34373B; border-radius: 4px; padding: 24px; margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; border-bottom: 1px solid #34373B; padding-bottom: 14px; margin-bottom: 16px;">
             <div>
-                <div style="font-size: 0.74rem; letter-spacing: 0.1em; text-transform: uppercase; color: #8F1D2C; font-weight: 700;">
+                <div style="font-size: 0.74rem; letter-spacing: 0.1em; text-transform: uppercase; color: #A51F32; font-weight: 700;">
                     ANALYSIS RESULT
                 </div>
-                <div style="font-size: 1.6rem; font-weight: 700; color: #171717; margin-top: 4px;">
+                <div style="font-size: 1.6rem; font-weight: 700; color: #F2F2F0; margin-top: 4px;">
                     {pred_label}
                 </div>
             </div>
             <div style="text-align: right;">
-                <div style="font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: #696762; font-weight: 600;">
+                <div style="font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: #A7A8A5; font-weight: 600;">
                     CLASSIFICATION CONFIDENCE
                 </div>
-                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 1.5rem; font-weight: 600; color: #171717; margin-top: 2px;">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 1.5rem; font-weight: 600; color: #F2F2F0; margin-top: 2px;">
                     {confidence_pct:.1f}%
                 </div>
-                <div style="font-size: 0.74rem; color: #696762;">
+                <div style="font-size: 0.74rem; color: #A7A8A5;">
                     Execution Time: <span class="tv-mono">{result.execution_time_ms} ms</span>
                 </div>
             </div>
@@ -154,34 +154,34 @@ def render_analyzer():
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
             <div>
-                <div style="font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: #696762; font-weight: 600;">
+                <div style="font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: #A7A8A5; font-weight: 600;">
                     PATTERN INTEGRITY
                 </div>
-                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 1.35rem; font-weight: 600; color: #171717; margin-top: 4px;">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 1.35rem; font-weight: 600; color: #F2F2F0; margin-top: 4px;">
                     {result.metrics['pattern_integrity_pct']:.1f}%
                 </div>
             </div>
             <div>
-                <div style="font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: #696762; font-weight: 600;">
+                <div style="font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: #A7A8A5; font-weight: 600;">
                     GROOVE VISIBILITY
                 </div>
-                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 1.35rem; font-weight: 600; color: #171717; margin-top: 4px;">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 1.35rem; font-weight: 600; color: #F2F2F0; margin-top: 4px;">
                     {result.metrics['groove_visibility_pct']:.1f}%
                 </div>
             </div>
             <div>
-                <div style="font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: #696762; font-weight: 600;">
+                <div style="font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: #A7A8A5; font-weight: 600;">
                     EDGE DEFINITION
                 </div>
-                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 1.35rem; font-weight: 600; color: #171717; margin-top: 4px;">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 1.35rem; font-weight: 600; color: #F2F2F0; margin-top: 4px;">
                     {result.metrics['edge_definition_pct']:.1f}%
                 </div>
             </div>
             <div>
-                <div style="font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: #696762; font-weight: 600;">
+                <div style="font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: #A7A8A5; font-weight: 600;">
                     TEXTURE CONDITION
                 </div>
-                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 1.35rem; font-weight: 600; color: #171717; margin-top: 4px;">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 1.35rem; font-weight: 600; color: #F2F2F0; margin-top: 4px;">
                     {result.metrics['texture_condition_pct']:.1f}%
                 </div>
             </div>
@@ -191,7 +191,7 @@ def render_analyzer():
 
     # Image Processing Pipeline Stages Grid
     st.markdown("""
-    <div style="font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: #171717; font-weight: 700; margin-bottom: 12px;">
+    <div style="font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: #F2F2F0; font-weight: 700; margin-bottom: 12px;">
         IMAGE PROCESSING PIPELINE
     </div>
     """, unsafe_allow_html=True)
@@ -220,14 +220,14 @@ def render_analyzer():
                 s_num, s_title, s_desc = stage_descriptions.get(s_key, (f"0{k_idx+1}", s_key.upper(), ""))
                 with cols[col_idx]:
                     st.markdown(f"""
-                    <div style="background: #FFFFFF; border: 1px solid #D8D5CE; border-radius: 4px; padding: 12px; margin-bottom: 16px;">
-                        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: #8F1D2C; font-weight: 600;">
+                    <div style="background: #17191C; border: 1px solid #34373B; border-radius: 4px; padding: 12px; margin-bottom: 16px;">
+                        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: #A51F32; font-weight: 600;">
                             STAGE {s_num}
                         </div>
-                        <div style="font-size: 0.85rem; font-weight: 600; color: #171717; margin-bottom: 4px;">
+                        <div style="font-size: 0.85rem; font-weight: 600; color: #F2F2F0; margin-bottom: 4px;">
                             {s_title}
                         </div>
-                        <div style="font-size: 0.74rem; color: #696762; margin-bottom: 8px; line-height: 1.4;">
+                        <div style="font-size: 0.74rem; color: #A7A8A5; margin-bottom: 8px; line-height: 1.4;">
                             {s_desc}
                         </div>
                     </div>
@@ -237,7 +237,7 @@ def render_analyzer():
     # Feature Analysis Section
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("""
-    <div style="font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: #171717; font-weight: 700; margin-bottom: 12px;">
+    <div style="font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: #F2F2F0; font-weight: 700; margin-bottom: 12px;">
         FEATURE ANALYSIS
     </div>
     """, unsafe_allow_html=True)
@@ -246,7 +246,7 @@ def render_analyzer():
     # Machine Learning Wear Classification Section
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("""
-    <div style="font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: #171717; font-weight: 700; margin-bottom: 12px;">
+    <div style="font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: #F2F2F0; font-weight: 700; margin-bottom: 12px;">
         WEAR CLASSIFICATION
     </div>
     """, unsafe_allow_html=True)
@@ -255,18 +255,18 @@ def render_analyzer():
 
     with ml_col1:
         st.markdown(f"""
-        <div style="background: #FFFFFF; border: 1px solid #D8D5CE; border-radius: 4px; padding: 18px 20px;">
-            <div style="font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: #696762; font-weight: 600;">
+        <div style="background: #17191C; border: 1px solid #34373B; border-radius: 4px; padding: 18px 20px;">
+            <div style="font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: #A7A8A5; font-weight: 600;">
                 ACTIVE CLASSIFICATION ENGINE
             </div>
-            <div style="font-size: 1.15rem; font-weight: 600; color: #171717; margin: 4px 0 10px 0;">
+            <div style="font-size: 1.15rem; font-weight: 600; color: #F2F2F0; margin: 4px 0 10px 0;">
                 {prediction['engine']}
             </div>
-            <div style="font-size: 0.82rem; color: #696762; line-height: 1.5;">
+            <div style="font-size: 0.82rem; color: #A7A8A5; line-height: 1.5;">
                 Model trained on calibrated physical-tyre stratified splits to prevent identity leakage.
                 Input feature vector comprises 25 normalized spatial, texture, and moment coefficients.
             </div>
-            <div style="margin-top: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 0.74rem; color: #8F1D2C;">
+            <div style="margin-top: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 0.74rem; color: #A51F32;">
                 DATASET STATUS: CURRENT VALIDATION SET
             </div>
         </div>
@@ -276,7 +276,7 @@ def render_analyzer():
         probs = prediction.get("probabilities")
         if probs:
             st.markdown("""
-            <div style="font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: #696762; font-weight: 600; margin-bottom: 8px;">
+            <div style="font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: #A7A8A5; font-weight: 600; margin-bottom: 8px;">
                 CLASS PROBABILITIES
             </div>
             """, unsafe_allow_html=True)
@@ -296,10 +296,10 @@ def render_analyzer():
     act_col1, act_col2 = st.columns([2.5, 1])
     with act_col1:
         st.markdown("""
-        <div style="font-size: 0.9rem; color: #171717; font-weight: 500;">
+        <div style="font-size: 0.9rem; color: #F2F2F0; font-weight: 500;">
             Continue to Tyre Replacement Advisor
         </div>
-        <div style="font-size: 0.82rem; color: #696762;">
+        <div style="font-size: 0.82rem; color: #A7A8A5;">
             Evaluate tread depth safety thresholds, inspect legal minimum benchmarks, and review database replacement options.
         </div>
         """, unsafe_allow_html=True)

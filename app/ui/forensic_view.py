@@ -26,24 +26,24 @@ def render_forensic():
 
     # Workflow Pipeline Sequence Indicator
     st.markdown("""
-    <div style="background: #FFFFFF; border: 1px solid #D8D5CE; border-radius: 4px; padding: 12px 16px; margin-bottom: 20px;">
-        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.74rem; font-weight: 600; letter-spacing: 0.08em; color: #171717; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-            <span><span style="color: #8F1D2C;">01</span> INPUT</span>
-            <span style="color: #D8D5CE;">&mdash;</span>
-            <span><span style="color: #8F1D2C;">02</span> PROCESS</span>
-            <span style="color: #D8D5CE;">&mdash;</span>
-            <span><span style="color: #8F1D2C;">03</span> EXTRACT</span>
-            <span style="color: #D8D5CE;">&mdash;</span>
-            <span><span style="color: #8F1D2C;">04</span> MATCH</span>
-            <span style="color: #D8D5CE;">&mdash;</span>
-            <span><span style="color: #8F1D2C;">05</span> REVIEW</span>
+    <div style="background: #17191C; border: 1px solid #34373B; border-radius: 4px; padding: 12px 16px; margin-bottom: 20px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.74rem; font-weight: 600; letter-spacing: 0.08em; color: #F2F2F0; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+            <span><span style="color: #A51F32;">01</span> INPUT</span>
+            <span style="color: #34373B;">&mdash;</span>
+            <span><span style="color: #A51F32;">02</span> PROCESS</span>
+            <span style="color: #34373B;">&mdash;</span>
+            <span><span style="color: #A51F32;">03</span> EXTRACT</span>
+            <span style="color: #34373B;">&mdash;</span>
+            <span><span style="color: #A51F32;">04</span> MATCH</span>
+            <span style="color: #34373B;">&mdash;</span>
+            <span><span style="color: #A51F32;">05</span> REVIEW</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
     # Conceptual Pipeline Relationship Diagram
     st.markdown("""
-    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: #696762; background: #ECEAE5; padding: 8px 14px; border-radius: 3px; border: 1px solid #D8D5CE; margin-bottom: 20px;">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: #A7A8A5; background: #1E2024; padding: 8px 14px; border-radius: 3px; border: 1px solid #34373B; margin-bottom: 20px;">
         TRACEABILITY: CRIME-SCENE IMPRESSION &rarr; TREAD PATTERN MATCH &rarr; TYRE DATABASE &rarr; VEHICLE FITMENT
     </div>
     """, unsafe_allow_html=True)
@@ -53,7 +53,7 @@ def render_forensic():
 
     with col_upload:
         st.markdown("""
-        <div style="font-size: 0.76rem; letter-spacing: 0.08em; text-transform: uppercase; color: #171717; font-weight: 700; margin-bottom: 8px;">
+        <div style="font-size: 0.76rem; letter-spacing: 0.08em; text-transform: uppercase; color: #F2F2F0; font-weight: 700; margin-bottom: 8px;">
             CRIME-SCENE IMPRESSION
         </div>
         """, unsafe_allow_html=True)
@@ -95,7 +95,7 @@ def render_forensic():
                 evidence_name = uploaded.name
 
             st.markdown("""
-            <div style="font-size: 0.76rem; color: #696762; margin-top: 6px;">
+            <div style="font-size: 0.76rem; color: #A7A8A5; margin-top: 6px;">
                 Supported formats: JPG, PNG<br>
                 Recommended: Clear tread geometry, visible impression area, minimal obstruction.
             </div>
@@ -103,7 +103,7 @@ def render_forensic():
 
     with col_settings:
         st.markdown("""
-        <div style="font-size: 0.76rem; letter-spacing: 0.08em; text-transform: uppercase; color: #171717; font-weight: 700; margin-bottom: 8px;">
+        <div style="font-size: 0.76rem; letter-spacing: 0.08em; text-transform: uppercase; color: #F2F2F0; font-weight: 700; margin-bottom: 8px;">
             SIMILARITY WEIGHT MATRIX
         </div>
         """, unsafe_allow_html=True)
@@ -138,7 +138,7 @@ def render_forensic():
 
         if not query_res.success:
             st.markdown(f"""
-            <div class="tv-notice" style="border-left-color: #8F1D2C;">
+            <div class="tv-notice" style="border-left-color: #A51F32;">
                 <div class="tv-notice-title">PROCESSING UNAVAILABLE</div>
                 {query_res.error_message}.
             </div>
@@ -176,32 +176,32 @@ def render_forensic():
     # 1. Forensic Processing Stages View
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("""
-    <div style="font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: #171717; font-weight: 700; margin-bottom: 12px;">
+    <div style="font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: #F2F2F0; font-weight: 700; margin-bottom: 12px;">
         IMPRESSION PROCESSING VIEW
     </div>
     """, unsafe_allow_html=True)
 
     proc_col1, proc_col2, proc_col3, proc_col4, proc_col5 = st.columns(5, gap="small")
     with proc_col1:
-        st.markdown("<div style='font-size:0.72rem; font-weight:600; text-transform:uppercase; color:#696762; margin-bottom:4px;'>ORIGINAL</div>", unsafe_allow_html=True)
+        st.markdown("<div style='font-size:0.72rem; font-weight:600; text-transform:uppercase; color:#A7A8A5; margin-bottom:4px;'>ORIGINAL</div>", unsafe_allow_html=True)
         st.image(query_res.stages["Original"], use_container_width=True)
     with proc_col2:
-        st.markdown("<div style='font-size:0.72rem; font-weight:600; text-transform:uppercase; color:#696762; margin-bottom:4px;'>ENHANCED</div>", unsafe_allow_html=True)
+        st.markdown("<div style='font-size:0.72rem; font-weight:600; text-transform:uppercase; color:#A7A8A5; margin-bottom:4px;'>ENHANCED</div>", unsafe_allow_html=True)
         st.image(query_res.stages["Enhanced (CLAHE)"], use_container_width=True)
     with proc_col3:
-        st.markdown("<div style='font-size:0.72rem; font-weight:600; text-transform:uppercase; color:#696762; margin-bottom:4px;'>SEGMENTED</div>", unsafe_allow_html=True)
+        st.markdown("<div style='font-size:0.72rem; font-weight:600; text-transform:uppercase; color:#A7A8A5; margin-bottom:4px;'>SEGMENTED</div>", unsafe_allow_html=True)
         st.image(query_res.stages["Segmentation Mask"], use_container_width=True)
     with proc_col4:
-        st.markdown("<div style='font-size:0.72rem; font-weight:600; text-transform:uppercase; color:#696762; margin-bottom:4px;'>EDGE MAP</div>", unsafe_allow_html=True)
+        st.markdown("<div style='font-size:0.72rem; font-weight:600; text-transform:uppercase; color:#A7A8A5; margin-bottom:4px;'>EDGE MAP</div>", unsafe_allow_html=True)
         st.image(query_res.stages["Canny Edges"], use_container_width=True)
     with proc_col5:
-        st.markdown("<div style='font-size:0.72rem; font-weight:600; text-transform:uppercase; color:#696762; margin-bottom:4px;'>EXTRACTED PATTERN</div>", unsafe_allow_html=True)
+        st.markdown("<div style='font-size:0.72rem; font-weight:600; text-transform:uppercase; color:#A7A8A5; margin-bottom:4px;'>EXTRACTED PATTERN</div>", unsafe_allow_html=True)
         st.image(query_res.stages["Segmented Tread"], use_container_width=True)
 
     # 2. Ranked Match Results
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown(f"""
-    <div style="font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: #171717; font-weight: 700; margin-bottom: 12px;">
+    <div style="font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: #F2F2F0; font-weight: 700; margin-bottom: 12px;">
         MATCH RESULTS ({len(candidates)} CANDIDATES RANKED)
     </div>
     """, unsafe_allow_html=True)
@@ -218,24 +218,24 @@ def render_forensic():
     # Top Candidate Primary Highlight
     top = candidates[0]
     st.markdown(f"""
-    <div style="background: #FFFFFF; border: 1px solid #D8D5CE; border-left: 4px solid #8F1D2C; border-radius: 4px; padding: 22px 24px; margin-bottom: 24px;">
+    <div style="background: #17191C; border: 1px solid #34373B; border-left: 4px solid #A51F32; border-radius: 4px; padding: 22px 24px; margin-bottom: 24px;">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;">
             <div>
-                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.74rem; font-weight: 600; color: #8F1D2C; letter-spacing: 0.08em;">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.74rem; font-weight: 600; color: #A51F32; letter-spacing: 0.08em;">
                     RANK #01 &mdash; HIGHEST SIMILARITY CANDIDATE
                 </div>
-                <div style="font-size: 1.6rem; font-weight: 700; color: #171717; margin: 4px 0 2px 0;">
+                <div style="font-size: 1.6rem; font-weight: 700; color: #F2F2F0; margin: 4px 0 2px 0;">
                     {top.manufacturer.upper()} {top.model.upper()}
                 </div>
-                <div style="font-size: 0.85rem; color: #696762;">
+                <div style="font-size: 0.85rem; color: #A7A8A5;">
                     Pattern: {top.pattern_name} &nbsp;|&nbsp; Geometry: {top.pattern_type} &nbsp;|&nbsp; Symmetry: {top.symmetry}
                 </div>
             </div>
             <div style="text-align: right;">
-                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 2.2rem; font-weight: 700; color: #8F1D2C;">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 2.2rem; font-weight: 700; color: #A51F32;">
                     {top.similarity_score:.1f}%
                 </div>
-                <div style="font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: #696762; font-weight: 600;">
+                <div style="font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: #A7A8A5; font-weight: 600;">
                     OVERALL SIMILARITY
                 </div>
             </div>
@@ -248,7 +248,7 @@ def render_forensic():
 
     with side_col1:
         st.markdown("""
-        <div style="font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: #171717; font-weight: 700; margin-bottom: 6px;">
+        <div style="font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: #F2F2F0; font-weight: 700; margin-bottom: 6px;">
             EVIDENCE IMPRESSION
         </div>
         """, unsafe_allow_html=True)
@@ -256,49 +256,49 @@ def render_forensic():
 
     with side_col2:
         st.markdown("""
-        <div style="font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: #171717; font-weight: 700; margin-bottom: 6px;">
+        <div style="font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: #F2F2F0; font-weight: 700; margin-bottom: 6px;">
             REFERENCE MATCH (01)
         </div>
         """, unsafe_allow_html=True)
         if Path(top.reference_image_path).exists():
             st.image(top.reference_image_path, caption=f"{top.manufacturer} {top.model}", use_container_width=True)
         else:
-            st.markdown("<div style='background:#ECEAE5; height:200px; display:flex; align-items:center; justify-content:center; color:#696762; font-size:0.8rem;'>Reference image unavailable</div>", unsafe_allow_html=True)
+            st.markdown("<div style='background:#1E2024; height:200px; display:flex; align-items:center; justify-content:center; color:#A7A8A5; font-size:0.8rem;'>Reference image unavailable</div>", unsafe_allow_html=True)
 
     with side_col3:
         st.markdown("""
-        <div style="font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: #171717; font-weight: 700; margin-bottom: 6px;">
+        <div style="font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: #F2F2F0; font-weight: 700; margin-bottom: 6px;">
             MATCH COMPONENTS
         </div>
         """, unsafe_allow_html=True)
 
         st.markdown(f"""
-        <div style="background: #FFFFFF; border: 1px solid #D8D5CE; border-radius: 4px; padding: 14px; margin-bottom: 14px;">
-            <div style="display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.82rem; border-bottom: 1px solid #ECEAE5;">
-                <span style="color: #696762;">EDGE SIMILARITY</span>
-                <span class="tv-mono" style="font-weight: 600; color: #171717;">{top.component_scores['edge_similarity']:.1f}%</span>
+        <div style="background: #17191C; border: 1px solid #34373B; border-radius: 4px; padding: 14px; margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.82rem; border-bottom: 1px solid #1E2024;">
+                <span style="color: #A7A8A5;">EDGE SIMILARITY</span>
+                <span class="tv-mono" style="font-weight: 600; color: #F2F2F0;">{top.component_scores['edge_similarity']:.1f}%</span>
             </div>
-            <div style="display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.82rem; border-bottom: 1px solid #ECEAE5;">
-                <span style="color: #696762;">TEXTURE SIMILARITY</span>
-                <span class="tv-mono" style="font-weight: 600; color: #171717;">{top.component_scores['texture_similarity']:.1f}%</span>
+            <div style="display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.82rem; border-bottom: 1px solid #1E2024;">
+                <span style="color: #A7A8A5;">TEXTURE SIMILARITY</span>
+                <span class="tv-mono" style="font-weight: 600; color: #F2F2F0;">{top.component_scores['texture_similarity']:.1f}%</span>
             </div>
-            <div style="display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.82rem; border-bottom: 1px solid #ECEAE5;">
-                <span style="color: #696762;">SHAPE SIMILARITY</span>
-                <span class="tv-mono" style="font-weight: 600; color: #171717;">{top.component_scores['shape_similarity']:.1f}%</span>
+            <div style="display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.82rem; border-bottom: 1px solid #1E2024;">
+                <span style="color: #A7A8A5;">SHAPE SIMILARITY</span>
+                <span class="tv-mono" style="font-weight: 600; color: #F2F2F0;">{top.component_scores['shape_similarity']:.1f}%</span>
             </div>
-            <div style="display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.82rem; border-bottom: 1px solid #ECEAE5;">
-                <span style="color: #696762;">LOCAL FEATURE MATCH</span>
-                <span class="tv-mono" style="font-weight: 600; color: #171717;">{top.component_scores['local_pattern_similarity']:.1f}%</span>
+            <div style="display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.82rem; border-bottom: 1px solid #1E2024;">
+                <span style="color: #A7A8A5;">LOCAL FEATURE MATCH</span>
+                <span class="tv-mono" style="font-weight: 600; color: #F2F2F0;">{top.component_scores['local_pattern_similarity']:.1f}%</span>
             </div>
             <div style="display: flex; justify-content: space-between; padding: 6px 0 2px 0; font-size: 0.85rem; font-weight: 700;">
-                <span style="color: #8F1D2C;">OVERALL SIMILARITY</span>
-                <span class="tv-mono" style="color: #8F1D2C;">{top.similarity_score:.1f}%</span>
+                <span style="color: #A51F32;">OVERALL SIMILARITY</span>
+                <span class="tv-mono" style="color: #A51F32;">{top.similarity_score:.1f}%</span>
             </div>
         </div>
         """, unsafe_allow_html=True)
 
         st.markdown("""
-        <div style="font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: #171717; font-weight: 700; margin-bottom: 6px;">
+        <div style="font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: #F2F2F0; font-weight: 700; margin-bottom: 6px;">
             POSSIBLE VEHICLE APPLICATIONS
         </div>
         """, unsafe_allow_html=True)
@@ -306,15 +306,15 @@ def render_forensic():
         if top.compatible_vehicles:
             veh_list = sorted(list(set(top.compatible_vehicles)))
             st.markdown(f"""
-            <div style="background: #FFFFFF; border: 1px solid #D8D5CE; border-radius: 4px; padding: 12px; font-size: 0.84rem; line-height: 1.6; color: #171717;">
+            <div style="background: #17191C; border: 1px solid #34373B; border-radius: 4px; padding: 12px; font-size: 0.84rem; line-height: 1.6; color: #F2F2F0;">
                 {', '.join(veh_list)}
             </div>
             """, unsafe_allow_html=True)
         else:
-            st.markdown("<div style='font-size:0.8rem; color:#696762;'>No direct vehicle fitments mapped in current database slice.</div>", unsafe_allow_html=True)
+            st.markdown("<div style='font-size:0.8rem; color:#A7A8A5;'>No direct vehicle fitments mapped in current database slice.</div>", unsafe_allow_html=True)
 
         st.markdown("""
-        <div style="font-size: 0.72rem; color: #696762; margin-top: 6px; line-height: 1.4;">
+        <div style="font-size: 0.72rem; color: #A7A8A5; margin-top: 6px; line-height: 1.4;">
             Possible/common vehicle applications based on indexed factory specifications.
             Does not establish confirmed vehicle presence.
         </div>
@@ -323,7 +323,7 @@ def render_forensic():
     # Remaining Ranked Candidates
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("""
-    <div style="font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: #171717; font-weight: 700; margin-bottom: 10px;">
+    <div style="font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: #F2F2F0; font-weight: 700; margin-bottom: 10px;">
         SECONDARY RANKED CANDIDATES
     </div>
     """, unsafe_allow_html=True)

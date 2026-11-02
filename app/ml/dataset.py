@@ -48,7 +48,10 @@ class WearDataset:
                     filename = file_path.stem
                     # Extract physical tyre ID (e.g., "tyre01" from "tyre01_01.jpg")
                     parts = filename.split("_")
-                    tyre_id = parts[0] if len(parts) > 1 else filename
+                    if len(parts) >= 2:
+                        tyre_id = f"{parts[0]}_{parts[1]}"
+                    else:
+                        tyre_id = filename
 
                     records.append({
                         "file_path": str(file_path),

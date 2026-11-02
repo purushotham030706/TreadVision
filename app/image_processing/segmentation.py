@@ -80,8 +80,12 @@ def segment_tread_region(
             # Default central 70% rectangular ROI typical of tyre tread photograph
             pad_h, pad_w = int(h * 0.15), int(w * 0.15)
             clean_mask = np.zeros_like(binary)
-            clean_mask[pad_h:h-pad_h, pad_w:w-pad_w] = binary[pad_h:h-pad_h, pad_w:w-pad_w]
+            clean_mask[pad_h:h-pad_h, pad_w:w-pad_w] = 255
             thresh_info += "_fallback_central_roi"
+    else:
+        # Morphological closing bridges small gaps to ensure contiguous contact patch
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (15, 15))
+        clean_mask = cv2.morphologyEx(clean_mask, cv2.MORPH_CLOSE, kernel)
 
     # Segmented output: enhanced tread isolated by mask
     segmented_tread = cv2.bitwise_and(enhanced_gray, enhanced_gray, mask=clean_mask)
