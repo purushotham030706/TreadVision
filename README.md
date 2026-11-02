@@ -290,7 +290,7 @@ Open your browser at `http://localhost:8501`.
 
 ## 8. Experimental Evaluation
 
-Evaluating Random Forest and Support Vector Machine classifiers on extracted 25-D classical computer vision feature vectors across calibrated tyre samples yields:
+Evaluating Random Forest and Support Vector Machine classifiers on extracted 25-D classical computer vision feature vectors across calibrated validation samples yields:
 
 | Model Architecture | Accuracy | Precision | Recall | F1-Score | 3-Fold Stratified CV |
 | :--- | :---: | :---: | :---: | :---: | :---: |
@@ -298,7 +298,7 @@ Evaluating Random Forest and Support Vector Machine classifiers on extracted 25-
 | **Support Vector Classifier (RBF)** | 100.0% | 1.000 | 1.000 | 1.000 | 100.0% |
 | **K-Nearest Neighbors ($k=5$)** | 100.0% | 1.000 | 1.000 | 1.000 | 96.3% |
 
-*Note: Models evaluated on calibrated physical-tyre stratified splits where images from the same physical tyre are strictly restricted to either the training or testing partition.*
+*Notice: Current metrics reflect the project's calibrated demonstration validation set evaluated with physical-tyre group stratification (where views from the same physical tyre are strictly restricted to either the training or testing partition to avoid leakage). These results illustrate feature discriminability on the calibrated reference set and should be re-evaluated as larger operational fleet datasets are ingested.*
 
 ---
 
