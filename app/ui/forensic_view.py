@@ -1,7 +1,7 @@
 """
 TreadVision: Forensic Tread Matcher UI
-Compares photographed crime-scene impressions against known reference patterns
-and retrieves possible vehicle applications.
+Workstation for digital impression processing, multi-criteria similarity matching,
+and vehicle fitment retrieval.
 """
 from pathlib import Path
 import json
@@ -18,58 +18,101 @@ from app.ui.components import render_header, render_forensic_notice
 
 
 def render_forensic():
-    """Render the Forensic Tread Matcher interface."""
+    """Render the Forensic Tread Matcher workstation."""
     render_header(
-        "Forensic Tread Matcher",
-        "Compare a photographed crime-scene tyre impression against reference patterns to identify probable tyre models and vehicle applications."
+        "FORENSIC TREAD MATCHER",
+        "Compare a photographed tyre impression against reference tread patterns."
     )
 
-    # Mandatory Forensic Disclaimer Callout
-    render_forensic_notice()
+    # Workflow Pipeline Sequence Indicator
+    st.markdown("""
+    <div style="background: #FFFFFF; border: 1px solid #D8D5CE; border-radius: 4px; padding: 12px 16px; margin-bottom: 20px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.74rem; font-weight: 600; letter-spacing: 0.08em; color: #171717; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+            <span><span style="color: #8F1D2C;">01</span> INPUT</span>
+            <span style="color: #D8D5CE;">&mdash;</span>
+            <span><span style="color: #8F1D2C;">02</span> PROCESS</span>
+            <span style="color: #D8D5CE;">&mdash;</span>
+            <span><span style="color: #8F1D2C;">03</span> EXTRACT</span>
+            <span style="color: #D8D5CE;">&mdash;</span>
+            <span><span style="color: #8F1D2C;">04</span> MATCH</span>
+            <span style="color: #D8D5CE;">&mdash;</span>
+            <span><span style="color: #8F1D2C;">05</span> REVIEW</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Conceptual Pipeline Relationship Diagram
+    st.markdown("""
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: #696762; background: #ECEAE5; padding: 8px 14px; border-radius: 3px; border: 1px solid #D8D5CE; margin-bottom: 20px;">
+        TRACEABILITY: CRIME-SCENE IMPRESSION &rarr; TREAD PATTERN MATCH &rarr; TYRE DATABASE &rarr; VEHICLE FITMENT
+    </div>
+    """, unsafe_allow_html=True)
 
     # Input Section: Crime-Scene Impression Upload or Provided Samples
-    col_upload, col_settings = st.columns([2, 1], gap="medium")
+    col_upload, col_settings = st.columns([1.6, 1], gap="large")
 
     with col_upload:
+        st.markdown("""
+        <div style="font-size: 0.76rem; letter-spacing: 0.08em; text-transform: uppercase; color: #171717; font-weight: 700; margin-bottom: 8px;">
+            CRIME-SCENE IMPRESSION
+        </div>
+        """, unsafe_allow_html=True)
+
         source_mode = st.radio(
-            "Select Crime-Scene Impression:",
-            ["Choose Evidence Sample", "Upload Custom Impression Photograph"],
-            horizontal=True
+            "Evidence Selection:",
+            ["Select Verified Evidence Sample", "Upload Custom Impression Photograph"],
+            horizontal=True,
+            label_visibility="collapsed"
         )
 
         impression_to_process = None
         evidence_name = ""
 
-        if source_mode == "Choose Evidence Sample":
+        if source_mode == "Select Verified Evidence Sample":
             evidence_samples = {
-                "Evidence Sample 01 — Wet Mud Track (Michelin Primacy candidate)": FORENSIC_IMPRESSIONS_DIR / "impression_crime_scene_01_mud_michelin.jpg",
+                "Evidence Sample 01 — Mud Track (Michelin candidate)": FORENSIC_IMPRESSIONS_DIR / "impression_crime_scene_01_mud_michelin.jpg",
                 "Evidence Sample 02 — Dry Soil Impression (Continental candidate)": FORENSIC_IMPRESSIONS_DIR / "impression_crime_scene_02_soil_continental.jpg",
-                "Evidence Sample 03 — Dirt Surface Impression (Bridgestone candidate)": FORENSIC_IMPRESSIONS_DIR / "impression_crime_scene_03_dirt_bridgestone.jpg",
-                "Evidence Sample 04 — Sand Dune Mark (Goodyear candidate)": FORENSIC_IMPRESSIONS_DIR / "impression_crime_scene_04_sand_goodyear.jpg",
+                "Evidence Sample 03 — Dirt Surface Mark (Bridgestone candidate)": FORENSIC_IMPRESSIONS_DIR / "impression_crime_scene_03_dirt_bridgestone.jpg",
+                "Evidence Sample 04 — Sand Impression (Goodyear candidate)": FORENSIC_IMPRESSIONS_DIR / "impression_crime_scene_04_sand_goodyear.jpg",
                 "Evidence Sample 05 — Soil Track Mark (Pirelli candidate)": FORENSIC_IMPRESSIONS_DIR / "impression_crime_scene_05_mud_pirelli.jpg",
             }
-            selected_sample_key = st.selectbox("Select evidence file:", list(evidence_samples.keys()))
-            sample_file = evidence_samples[selected_sample_key]
+            selected_key = st.selectbox(
+                "Evidence Sample File:",
+                list(evidence_samples.keys()),
+                label_visibility="collapsed"
+            )
+            sample_file = evidence_samples[selected_key]
             if sample_file.exists():
                 impression_to_process = str(sample_file)
-                evidence_name = selected_sample_key
+                evidence_name = selected_key
         else:
             uploaded = st.file_uploader(
-                "Upload photographed tyre mark from crime-scene surface (mud, sand, soil, dirt):",
+                "Upload photographed tyre mark from substrate (mud, sand, soil, dirt):",
                 type=["jpg", "jpeg", "png", "bmp", "webp"]
             )
             if uploaded is not None:
                 impression_to_process = Image.open(uploaded)
                 evidence_name = uploaded.name
 
+            st.markdown("""
+            <div style="font-size: 0.76rem; color: #696762; margin-top: 6px;">
+                Supported formats: JPG, PNG<br>
+                Recommended: Clear tread geometry, visible impression area, minimal obstruction.
+            </div>
+            """, unsafe_allow_html=True)
+
     with col_settings:
-        st.markdown("<div style='font-weight:600; color:#38bdf8; margin-bottom:8px;'>⚖️ Similarity Weight Matrix</div>", unsafe_allow_html=True)
+        st.markdown("""
+        <div style="font-size: 0.76rem; letter-spacing: 0.08em; text-transform: uppercase; color: #171717; font-weight: 700; margin-bottom: 8px;">
+            SIMILARITY WEIGHT MATRIX
+        </div>
+        """, unsafe_allow_html=True)
+
         w_edge = st.slider("Edge Structure Weight:", 0.10, 0.50, FORENSIC_WEIGHTS["edge"], 0.05)
         w_tex = st.slider("Texture (GLCM) Weight:", 0.10, 0.50, FORENSIC_WEIGHTS["texture"], 0.05)
-        w_shape = st.slider("Shape / Hu Weight:", 0.10, 0.50, FORENSIC_WEIGHTS["shape"], 0.05)
+        w_shape = st.slider("Shape / Moments Weight:", 0.10, 0.50, FORENSIC_WEIGHTS["shape"], 0.05)
         w_local = st.slider("ORB Keypoint Weight:", 0.05, 0.40, FORENSIC_WEIGHTS["local"], 0.05)
 
-        # Normalize weights so they sum to 1.0
         total_w = w_edge + w_tex + w_shape + w_local
         normalized_weights = {
             "edge": w_edge / total_w,
@@ -79,21 +122,29 @@ def render_forensic():
         }
 
     if impression_to_process is None:
-        st.info("👆 Please select an evidence sample or upload a crime-scene impression to run matching.")
+        st.markdown("""
+        <div class="tv-notice" style="margin-top: 24px;">
+            <div class="tv-notice-title">AWAITING IMPRESSION INPUT</div>
+            Select an evidence sample or upload a crime-scene impression to run forensic matching.
+        </div>
+        """, unsafe_allow_html=True)
         return
 
-    # Initialize Forensic Matcher
+    # Execute Forensic Matcher
     matcher = ForensicMatcher(weights=normalized_weights)
 
-    with st.spinner("Analyzing crime-scene impression and querying reference pattern database..."):
-        # Process impression
+    with st.spinner("Processing impression and calculating multi-criteria pattern similarity..."):
         query_res = matcher.process_impression(impression_to_process)
 
         if not query_res.success:
-            st.error(f"Impression Processing Error: {query_res.error_message}")
+            st.markdown(f"""
+            <div class="tv-notice" style="border-left-color: #8F1D2C;">
+                <div class="tv-notice-title">PROCESSING UNAVAILABLE</div>
+                {query_res.error_message}.
+            </div>
+            """, unsafe_allow_html=True)
             return
 
-        # Fetch reference database tyres and precomputed features
         session = get_db_session()
         db_records = []
         try:
@@ -120,99 +171,179 @@ def render_forensic():
         finally:
             session.close()
 
-        # Perform matching
         candidates = matcher.match(query_res, db_records, top_k=5)
 
-    # 1. Processing Preview Section
+    # 1. Forensic Processing Stages View
     st.markdown("<br>", unsafe_allow_html=True)
-    st.subheader("Impression Digital Image Processing Stages")
-    p_col1, p_col2, p_col3, p_col4 = st.columns(4)
+    st.markdown("""
+    <div style="font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: #171717; font-weight: 700; margin-bottom: 12px;">
+        IMPRESSION PROCESSING VIEW
+    </div>
+    """, unsafe_allow_html=True)
 
-    with p_col1:
-        st.image(query_res.stages["Original"], caption="1. Photographed Impression", use_container_width=True)
-    with p_col2:
-        st.image(query_res.stages["Enhanced (CLAHE)"], caption="2. CLAHE Contrast Enhanced", use_container_width=True)
-    with p_col3:
-        st.image(query_res.stages["Segmentation Mask"], caption="3. Adaptive Threshold Mask", use_container_width=True)
-    with p_col4:
-        st.image(query_res.stages["Canny Edges"], caption="4. Extracted Tread Edges", use_container_width=True)
+    proc_col1, proc_col2, proc_col3, proc_col4, proc_col5 = st.columns(5, gap="small")
+    with proc_col1:
+        st.markdown("<div style='font-size:0.72rem; font-weight:600; text-transform:uppercase; color:#696762; margin-bottom:4px;'>ORIGINAL</div>", unsafe_allow_html=True)
+        st.image(query_res.stages["Original"], use_container_width=True)
+    with proc_col2:
+        st.markdown("<div style='font-size:0.72rem; font-weight:600; text-transform:uppercase; color:#696762; margin-bottom:4px;'>ENHANCED</div>", unsafe_allow_html=True)
+        st.image(query_res.stages["Enhanced (CLAHE)"], use_container_width=True)
+    with proc_col3:
+        st.markdown("<div style='font-size:0.72rem; font-weight:600; text-transform:uppercase; color:#696762; margin-bottom:4px;'>SEGMENTED</div>", unsafe_allow_html=True)
+        st.image(query_res.stages["Segmentation Mask"], use_container_width=True)
+    with proc_col4:
+        st.markdown("<div style='font-size:0.72rem; font-weight:600; text-transform:uppercase; color:#696762; margin-bottom:4px;'>EDGE MAP</div>", unsafe_allow_html=True)
+        st.image(query_res.stages["Canny Edges"], use_container_width=True)
+    with proc_col5:
+        st.markdown("<div style='font-size:0.72rem; font-weight:600; text-transform:uppercase; color:#696762; margin-bottom:4px;'>EXTRACTED PATTERN</div>", unsafe_allow_html=True)
+        st.image(query_res.stages["Segmented Tread"], use_container_width=True)
 
-    # 2. Forensic Match Results
+    # 2. Ranked Match Results
     st.markdown("<br>", unsafe_allow_html=True)
-    st.subheader(f"Probable Tread Pattern Candidates ({len(candidates)} Ranked Matches)")
+    st.markdown(f"""
+    <div style="font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: #171717; font-weight: 700; margin-bottom: 12px;">
+        MATCH RESULTS ({len(candidates)} CANDIDATES RANKED)
+    </div>
+    """, unsafe_allow_html=True)
 
     if not candidates:
-        st.warning("No reference patterns available in database for matching.")
+        st.markdown("""
+        <div class="tv-notice">
+            <div class="tv-notice-title">NO CANDIDATE MATCHES</div>
+            No reference patterns are indexed in the active database slice.
+        </div>
+        """, unsafe_allow_html=True)
         return
 
-    # Top Candidate Highlight
+    # Top Candidate Primary Highlight
     top = candidates[0]
     st.markdown(f"""
-    <div style="background: linear-gradient(135deg, #111827 0%, #172554 100%); border: 2px solid #38bdf8; border-radius: 14px; padding: 24px; margin-bottom: 24px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+    <div style="background: #FFFFFF; border: 1px solid #D8D5CE; border-left: 4px solid #8F1D2C; border-radius: 4px; padding: 22px 24px; margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;">
             <div>
-                <span class="tv-badge tv-badge-cyan">#1 HIGHEST SIMILARITY CANDIDATE</span>
-                <h2 style="color: #ffffff; margin: 6px 0 0 0;">{top.manufacturer} {top.model}</h2>
-                <div style="color: #94a3b8; font-size: 0.9rem; margin-top: 4px;">Pattern: {top.pattern_name} ({top.pattern_type})</div>
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.74rem; font-weight: 600; color: #8F1D2C; letter-spacing: 0.08em;">
+                    RANK #01 &mdash; HIGHEST SIMILARITY CANDIDATE
+                </div>
+                <div style="font-size: 1.6rem; font-weight: 700; color: #171717; margin: 4px 0 2px 0;">
+                    {top.manufacturer.upper()} {top.model.upper()}
+                </div>
+                <div style="font-size: 0.85rem; color: #696762;">
+                    Pattern: {top.pattern_name} &nbsp;|&nbsp; Geometry: {top.pattern_type} &nbsp;|&nbsp; Symmetry: {top.symmetry}
+                </div>
             </div>
             <div style="text-align: right;">
-                <div style="font-family:'Chakra Petch',sans-serif; font-size: 2.8rem; font-weight:700; color: #38bdf8;">
-                    {top.similarity_score}%
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 2.2rem; font-weight: 700; color: #8F1D2C;">
+                    {top.similarity_score:.1f}%
                 </div>
-                <span class="tv-badge tv-badge-emerald">{top.confidence_level}</span>
+                <div style="font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: #696762; font-weight: 600;">
+                    OVERALL SIMILARITY
+                </div>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # Side-by-side Visual Comparison of Top Candidate
-    st.markdown("#### Side-by-Side Visual Comparison")
-    side_col1, side_col2, side_col3 = st.columns([1.2, 1.2, 1.6], gap="medium")
+    # Side-by-Side Visual Comparison & Feature Breakdown
+    side_col1, side_col2, side_col3 = st.columns([1.2, 1.2, 1.6], gap="large")
 
     with side_col1:
-        st.markdown("**Uploaded Evidence Impression**")
-        st.image(query_res.stages["Enhanced (CLAHE)"], use_container_width=True, caption=evidence_name)
+        st.markdown("""
+        <div style="font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: #171717; font-weight: 700; margin-bottom: 6px;">
+            EVIDENCE IMPRESSION
+        </div>
+        """, unsafe_allow_html=True)
+        st.image(query_res.stages["Enhanced (CLAHE)"], caption="Contrast-Enhanced Forensic Impression", use_container_width=True)
 
     with side_col2:
-        st.markdown(f"**Database Reference Match (#{top.rank})**")
+        st.markdown("""
+        <div style="font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: #171717; font-weight: 700; margin-bottom: 6px;">
+            REFERENCE MATCH (01)
+        </div>
+        """, unsafe_allow_html=True)
         if Path(top.reference_image_path).exists():
-            st.image(top.reference_image_path, use_container_width=True, caption=f"{top.manufacturer} {top.model}")
+            st.image(top.reference_image_path, caption=f"{top.manufacturer} {top.model}", use_container_width=True)
         else:
-            st.write("Pattern image preview unavailable")
+            st.markdown("<div style='background:#ECEAE5; height:200px; display:flex; align-items:center; justify-content:center; color:#696762; font-size:0.8rem;'>Reference image unavailable</div>", unsafe_allow_html=True)
 
     with side_col3:
-        st.markdown("**Multi-Criteria Component Similarity**")
-        st.write(f"- Edge Structure: **{top.component_scores['edge_similarity']}%** (weight {normalized_weights['edge']*100:.0f}%)")
-        st.write(f"- GLCM Texture: **{top.component_scores['texture_similarity']}%** (weight {normalized_weights['texture']*100:.0f}%)")
-        st.write(f"- Shape / Moments: **{top.component_scores['shape_similarity']}%** (weight {normalized_weights['shape']*100:.0f}%)")
-        st.write(f"- ORB Keypoints: **{top.component_scores['local_pattern_similarity']}%** (weight {normalized_weights['local']*100:.0f}%)")
+        st.markdown("""
+        <div style="font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: #171717; font-weight: 700; margin-bottom: 6px;">
+            MATCH COMPONENTS
+        </div>
+        """, unsafe_allow_html=True)
 
-        st.markdown("---")
-        st.markdown("**Possible / Common Vehicle Applications:**")
+        st.markdown(f"""
+        <div style="background: #FFFFFF; border: 1px solid #D8D5CE; border-radius: 4px; padding: 14px; margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.82rem; border-bottom: 1px solid #ECEAE5;">
+                <span style="color: #696762;">EDGE SIMILARITY</span>
+                <span class="tv-mono" style="font-weight: 600; color: #171717;">{top.component_scores['edge_similarity']:.1f}%</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.82rem; border-bottom: 1px solid #ECEAE5;">
+                <span style="color: #696762;">TEXTURE SIMILARITY</span>
+                <span class="tv-mono" style="font-weight: 600; color: #171717;">{top.component_scores['texture_similarity']:.1f}%</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.82rem; border-bottom: 1px solid #ECEAE5;">
+                <span style="color: #696762;">SHAPE SIMILARITY</span>
+                <span class="tv-mono" style="font-weight: 600; color: #171717;">{top.component_scores['shape_similarity']:.1f}%</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.82rem; border-bottom: 1px solid #ECEAE5;">
+                <span style="color: #696762;">LOCAL FEATURE MATCH</span>
+                <span class="tv-mono" style="font-weight: 600; color: #171717;">{top.component_scores['local_pattern_similarity']:.1f}%</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 6px 0 2px 0; font-size: 0.85rem; font-weight: 700;">
+                <span style="color: #8F1D2C;">OVERALL SIMILARITY</span>
+                <span class="tv-mono" style="color: #8F1D2C;">{top.similarity_score:.1f}%</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div style="font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: #171717; font-weight: 700; margin-bottom: 6px;">
+            POSSIBLE VEHICLE APPLICATIONS
+        </div>
+        """, unsafe_allow_html=True)
+
         if top.compatible_vehicles:
-            for veh in sorted(list(set(top.compatible_vehicles))):
-                st.markdown(f"- 🚗 *{veh}*")
+            veh_list = sorted(list(set(top.compatible_vehicles)))
+            st.markdown(f"""
+            <div style="background: #FFFFFF; border: 1px solid #D8D5CE; border-radius: 4px; padding: 12px; font-size: 0.84rem; line-height: 1.6; color: #171717;">
+                {', '.join(veh_list)}
+            </div>
+            """, unsafe_allow_html=True)
         else:
-            st.write("No vehicles indexed for this tyre.")
-        st.caption("Notice: Listed models represent known OEM/aftermarket fitments for this tyre pattern, not definitive proof of suspect vehicle presence.")
+            st.markdown("<div style='font-size:0.8rem; color:#696762;'>No direct vehicle fitments mapped in current database slice.</div>", unsafe_allow_html=True)
 
-    # All Ranked Candidates
+        st.markdown("""
+        <div style="font-size: 0.72rem; color: #696762; margin-top: 6px; line-height: 1.4;">
+            Possible/common vehicle applications based on indexed factory specifications.
+            Does not establish confirmed vehicle presence.
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Remaining Ranked Candidates
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("#### All Top Candidate Matches")
+    st.markdown("""
+    <div style="font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: #171717; font-weight: 700; margin-bottom: 10px;">
+        SECONDARY RANKED CANDIDATES
+    </div>
+    """, unsafe_allow_html=True)
 
-    for cand in candidates:
-        with st.expander(f"Rank #{cand.rank}: {cand.manufacturer} {cand.model} — Similarity: {cand.similarity_score}% ({cand.confidence_level})", expanded=(cand.rank == 1)):
-            c_c1, c_c2 = st.columns([1, 2])
-            with c_c1:
+    for cand in candidates[1:]:
+        with st.expander(f"0{cand.rank}  |  {cand.manufacturer.upper()} {cand.model.upper()}  —  SIMILARITY: {cand.similarity_score:.1f}%", expanded=False):
+            c_col_img, c_col_info = st.columns([1, 2.5], gap="medium")
+            with c_col_img:
                 if Path(cand.reference_image_path).exists():
                     st.image(cand.reference_image_path, caption=cand.pattern_name, use_container_width=True)
-            with c_c2:
+            with c_col_info:
                 st.markdown(f"**Tyre Model:** {cand.manufacturer} {cand.model}")
-                st.markdown(f"**Pattern Type:** {cand.pattern_type} | **Symmetry:** {cand.symmetry}")
-                st.markdown(f"**Similarity Score:** `{cand.similarity_score}%` | **Confidence:** `{cand.confidence_level}`")
-                st.markdown(f"**Extracted Scores:** Edge `{cand.component_scores['edge_similarity']}%`, Texture `{cand.component_scores['texture_similarity']}%`, Shape `{cand.component_scores['shape_similarity']}%`, Local `{cand.component_scores['local_pattern_similarity']}%`")
+                st.markdown(f"**Pattern Geometry:** {cand.pattern_type} | **Symmetry:** {cand.symmetry}")
+                st.markdown(f"**Calculated Similarity:** `{cand.similarity_score:.1f}%`")
+                st.markdown(f"**Component Scores:** Edge `{cand.component_scores['edge_similarity']:.1f}%` | Texture `{cand.component_scores['texture_similarity']:.1f}%` | Shape `{cand.component_scores['shape_similarity']:.1f}%` | Local ORB `{cand.component_scores['local_pattern_similarity']:.1f}%`")
                 if cand.available_sizes:
                     st.markdown(f"**Available Sizes:** `{', '.join(cand.available_sizes)}`")
                 if cand.compatible_vehicles:
-                    st.markdown(f"**Possible/Common Vehicle Applications:** {', '.join(set(cand.compatible_vehicles))}")
+                    st.markdown(f"**Possible/Common Vehicle Applications:** {', '.join(sorted(list(set(cand.compatible_vehicles))))}")
                 st.markdown(f"*{cand.description}*")
+
+    # Mandatory Professional Forensic Notice
+    render_forensic_notice()

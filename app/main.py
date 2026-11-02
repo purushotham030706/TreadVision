@@ -1,8 +1,6 @@
 """
-TreadVision: Main Streamlit Application Entrypoint
-Full Academic Title:
-TreadVision: Intelligent Tyre Tread Analysis, Forensic Tread Matching and Vehicle Fitment Intelligence
-Using Image Processing and Machine Learning
+TreadVision: Main Application Entrypoint
+Academic & Forensic Platform for Tyre Tread Analysis
 """
 import sys
 from pathlib import Path
@@ -14,10 +12,9 @@ if str(BASE_DIR) not in sys.path:
 
 import streamlit as st
 
-# Streamlit Page Configuration
+# Streamlit Page Configuration - Zero emojis
 st.set_page_config(
     page_title="TreadVision",
-    page_icon="🛞",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -37,13 +34,13 @@ from scripts.generate_demo_assets import generate_all_demo_assets
 def ensure_system_initialized():
     """Ensure database and demo assets exist on startup."""
     if not DATABASE_PATH.exists():
-        with st.spinner("Initializing TreadVision database and demo assets..."):
+        with st.spinner("Initializing reference database and calibrated assets..."):
             generate_all_demo_assets()
             seed_database(force_reseed=False)
 
 
 def main():
-    # Apply modern automotive dark theme
+    # Apply warm off-white automotive engineering theme
     apply_theme()
 
     # Self-healing database initialization
@@ -56,36 +53,34 @@ def main():
     # Sidebar Navigation & Branding
     with st.sidebar:
         st.markdown("""
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
-            <span style="font-size: 2rem;">🛞</span>
-            <div>
-                <div style="font-family: 'Chakra Petch', sans-serif; font-size: 1.5rem; font-weight: 700; color: #ffffff; letter-spacing: 0.5px;">
-                    TreadVision
-                </div>
-                <div style="color: #38bdf8; font-size: 0.78rem; font-weight: 500;">
-                    Vision & Forensic Intelligence
-                </div>
+        <div style="padding-bottom: 1.25rem; margin-bottom: 1.5rem; border-bottom: 1px solid #D8D5CE;">
+            <div style="font-family: 'IBM Plex Sans', sans-serif; font-size: 1.15rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #171717;">
+                TREADVISION
+            </div>
+            <div style="font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: #8F1D2C; font-weight: 600; margin-top: 2px;">
+                TYRE INTELLIGENCE PLATFORM
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-        st.markdown("<p style='font-size: 0.78rem; color: #64748b; text-transform: uppercase; font-weight: 600; margin-bottom: 6px;'>NAVIGATION</p>", unsafe_allow_html=True)
-
         pages = {
-            "home": ("🏠 Dashboard Home", "home"),
-            "analyzer": ("🔍 Module 1: Tread Analyzer", "analyzer"),
-            "replacement": ("🛡️ Module 2: Tyre Replacement", "replacement"),
-            "database": ("📚 Module 3: Tyre Database", "database"),
-            "forensic": ("🔬 Forensic Tread Matcher", "forensic"),
+            "home": "OVERVIEW",
+            "analyzer": "TREAD ANALYZER",
+            "replacement": "TYRE REPLACEMENT",
+            "database": "TREAD DATABASE",
+            "forensic": "FORENSIC MATCHER",
         }
 
         current_key = st.session_state["nav_selection"]
+        if current_key not in pages:
+            current_key = "home"
+
         selected_page = st.radio(
-            "Go to:",
+            "SELECT WORKFLOW:",
             list(pages.keys()),
-            format_func=lambda k: pages[k][0],
-            index=list(pages.keys()).index(current_key) if current_key in pages else 0,
-            label_visibility="collapsed"
+            format_func=lambda k: pages[k],
+            index=list(pages.keys()).index(current_key),
+            label_visibility="visible"
         )
 
         if selected_page != current_key:
@@ -94,19 +89,21 @@ def main():
 
         st.markdown("---")
         st.markdown("""
-        <div style="font-size: 0.78rem; color: #94a3b8; line-height: 1.5;">
-            <strong style="color: #cbd5e1;">Project Foundation:</strong><br>
-            • Classical Digital Image Processing<br>
-            • Canny / Sobel Edge Statistics<br>
-            • Gray-Level Co-occurrence (GLCM)<br>
-            • Contour Moments & Hu Descriptors<br>
-            • Multi-Criteria Similarity Metric<br>
-            • Anti-Leakage Physical Tyre Grouping
+        <div style="font-size: 0.78rem; color: #696762; line-height: 1.6;">
+            <div style="font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #171717; margin-bottom: 6px;">
+                TECHNICAL FOUNDATIONS
+            </div>
+            Digital Image Processing<br>
+            Bilateral & CLAHE Filtering<br>
+            Canny & Sobel Derivatives<br>
+            GLCM Texture Descriptors<br>
+            Hu Invariant Moments<br>
+            Stratified Group Splitting<br>
+            Multi-Criteria Similarity
         </div>
-        <br>
-        <div style="font-size: 0.72rem; color: #64748b; border-top: 1px solid #1e293b; padding-top: 10px;">
-            Academic & Forensic Prototype<br>
-            GitHub: <code>TreadVision</code>
+        <div style="margin-top: 18px; padding-top: 12px; border-top: 1px solid #D8D5CE; font-size: 0.74rem; color: #696762;">
+            Repository: <span class="tv-mono" style="color: #171717;">TreadVision</span><br>
+            Evaluation: <span class="tv-mono">Validation Set</span>
         </div>
         """, unsafe_allow_html=True)
 
