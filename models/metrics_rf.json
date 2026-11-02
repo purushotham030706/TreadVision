@@ -1,0 +1,70 @@
+{
+  "model_type": "rf",
+  "accuracy": 1.0,
+  "precision": 1.0,
+  "recall": 1.0,
+  "f1_score": 1.0,
+  "confusion_matrix": [
+    [
+      3,
+      0,
+      0
+    ],
+    [
+      0,
+      3,
+      0
+    ],
+    [
+      0,
+      0,
+      3
+    ]
+  ],
+  "cv_scores": [
+    1.0,
+    1.0,
+    1.0
+  ],
+  "cv_mean": 1.0,
+  "train_samples": 27,
+  "test_samples": 9,
+  "classification_report": {
+    "good": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 3.0
+    },
+    "moderate": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 3.0
+    },
+    "worn": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 3.0
+    },
+    "accuracy": 1.0,
+    "macro avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 9.0
+    },
+    "weighted avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 9.0
+    }
+  },
+  "classes": [
+    "good",
+    "moderate",
+    "worn"
+  ]
+}

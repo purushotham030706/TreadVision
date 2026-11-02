@@ -1,0 +1,380 @@
+"""
+TreadVision: Synthetic Asset and Demo Dataset Generator
+Generates realistic computer vision reference patterns, forensic crime scene impressions,
+and calibrated physical-tyre-grouped wear datasets.
+"""
+from pathlib import Path
+import cv2
+import numpy as np
+
+from app.config import (
+    REFERENCE_PATTERNS_DIR,
+    FORENSIC_IMPRESSIONS_DIR,
+    WEAR_DATA_DIR
+)
+
+
+def create_base_tread_canvas(h=512, w=512, bg_intensity=40):
+    """Create dark rubber background with subtle surface texture."""
+    base = np.full((h, w), bg_intensity, dtype=np.uint8)
+    noise = np.random.normal(0, 4, (h, w)).astype(np.int16)
+    textured = np.clip(base.astype(np.int16) + noise, 0, 255).astype(np.uint8)
+    return textured
+
+
+def render_primacy4_pattern(wear_level: float = 0.0) -> np.ndarray:
+    """
+    Renders Michelin Primacy 4 style asymmetric tread:
+    4 longitudinal grooves, lateral curved sipes, outside shoulder blocks.
+    wear_level: 0.0 (fresh/new) to 1.0 (completely bald/worn).
+    """
+    img = create_base_tread_canvas(512, 512, bg_intensity=int(50 + wear_level * 50))
+    groove_depth = int(220 * (1.0 - wear_level * 0.85))
+
+    # 4 circumferential grooves
+    groove_positions = [110, 200, 310, 410]
+    groove_width = max(2, int(18 * (1.0 - wear_level * 0.7)))
+
+    for x in groove_positions:
+        cv2.line(img, (x, 0), (x, 512), color=groove_depth, thickness=groove_width)
+
+    # Lateral angled sipes on outer ribs
+    sipe_spacing = 32
+    sipe_thickness = max(1, int(4 * (1.0 - wear_level * 0.8)))
+    if wear_level < 0.8:
+        for y in range(0, 512, sipe_spacing):
+            # Left shoulder sipes (slanted)
+            cv2.line(img, (10, y), (100, y + 15), color=int(groove_depth * 0.8), thickness=sipe_thickness)
+            # Center-left rib sipes
+            cv2.line(img, (120, y + 10), (190, y + 25), color=int(groove_depth * 0.7), thickness=sipe_thickness)
+            # Center-right rib sipes
+            cv2.line(img, (210, y + 5), (300, y + 20), color=int(groove_depth * 0.7), thickness=sipe_thickness)
+            # Right shoulder blocks
+            cv2.line(img, (320, y + 15), (400, y + 5), color=int(groove_depth * 0.75), thickness=sipe_thickness)
+            cv2.line(img, (420, y + 10), (500, y + 25), color=int(groove_depth * 0.8), thickness=sipe_thickness)
+
+    # Apply slight blur to simulate rubber moulding
+    img = cv2.GaussianBlur(img, (3, 3), 0.8)
+    return cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+
+
+def render_premiumcontact6_pattern(wear_level: float = 0.0) -> np.ndarray:
+    """
+    Renders Continental PremiumContact 6 style asymmetric tread:
+    3 wide longitudinal channels, macro-block shoulder, asymmetric chevron ribs.
+    """
+    img = create_base_tread_canvas(512, 512, bg_intensity=int(45 + wear_level * 50))
+    groove_depth = int(220 * (1.0 - wear_level * 0.85))
+
+    # 3 wide channels
+    groove_positions = [140, 260, 380]
+    groove_width = max(3, int(24 * (1.0 - wear_level * 0.7)))
+
+    for x in groove_positions:
+        cv2.line(img, (x, 0), (x, 512), color=groove_depth, thickness=groove_width)
+
+    # Asymmetric chevron notches
+    sipe_spacing = 40
+    sipe_thickness = max(1, int(5 * (1.0 - wear_level * 0.8)))
+    if wear_level < 0.8:
+        for y in range(0, 512, sipe_spacing):
+            # Outer macro blocks
+            cv2.line(img, (10, y), (130, y + 20), color=int(groove_depth * 0.85), thickness=sipe_thickness)
+            # Inner chevron rib
+            pts = np.array([[155, y + 10], [200, y + 25], [245, y + 10]], np.int32)
+            cv2.polylines(img, [pts], isClosed=False, color=int(groove_depth * 0.75), thickness=sipe_thickness)
+            # Second rib
+            cv2.line(img, (275, y + 20), (365, y + 5), color=int(groove_depth * 0.75), thickness=sipe_thickness)
+            # Right shoulder
+            cv2.line(img, (395, y + 5), (500, y + 30), color=int(groove_depth * 0.85), thickness=sipe_thickness)
+
+    img = cv2.GaussianBlur(img, (3, 3), 0.8)
+    return cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+
+
+def render_turanza_pattern(wear_level: float = 0.0) -> np.ndarray:
+    """
+    Renders Bridgestone Turanza T005 style tread:
+    4 ribs, high-angle shoulder siping, continuous center rib.
+    """
+    img = create_base_tread_canvas(512, 512, bg_intensity=int(48 + wear_level * 50))
+    groove_depth = int(220 * (1.0 - wear_level * 0.85))
+
+    groove_positions = [120, 215, 305, 400]
+    groove_width = max(2, int(16 * (1.0 - wear_level * 0.7)))
+
+    for x in groove_positions:
+        cv2.line(img, (x, 0), (x, 512), color=groove_depth, thickness=groove_width)
+
+    sipe_spacing = 28
+    sipe_thickness = max(1, int(3 * (1.0 - wear_level * 0.8)))
+    if wear_level < 0.8:
+        for y in range(0, 512, sipe_spacing):
+            cv2.line(img, (15, y), (110, y + 30), color=int(groove_depth * 0.8), thickness=sipe_thickness)
+            cv2.line(img, (130, y + 15), (205, y), color=int(groove_depth * 0.7), thickness=sipe_thickness)
+            cv2.line(img, (315, y), (390, y + 20), color=int(groove_depth * 0.7), thickness=sipe_thickness)
+            cv2.line(img, (410, y + 25), (495, y), color=int(groove_depth * 0.8), thickness=sipe_thickness)
+
+    img = cv2.GaussianBlur(img, (3, 3), 0.8)
+    return cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+
+
+def render_efficientgrip_pattern(wear_level: float = 0.0) -> np.ndarray:
+    """
+    Renders Goodyear EfficientGrip Performance 2 style tread:
+    Curved lateral hydro-channels and 4 circumferential ribs.
+    """
+    img = create_base_tread_canvas(512, 512, bg_intensity=int(52 + wear_level * 50))
+    groove_depth = int(220 * (1.0 - wear_level * 0.85))
+
+    groove_positions = [105, 205, 315, 415]
+    groove_width = max(2, int(17 * (1.0 - wear_level * 0.7)))
+
+    for x in groove_positions:
+        cv2.line(img, (x, 0), (x, 512), color=groove_depth, thickness=groove_width)
+
+    sipe_spacing = 34
+    sipe_thickness = max(1, int(4 * (1.0 - wear_level * 0.8)))
+    if wear_level < 0.8:
+        for y in range(0, 512, sipe_spacing):
+            # Curved hydro grooves
+            cv2.ellipse(img, (50, y), (50, 20), 0, 0, 90, int(groove_depth * 0.8), sipe_thickness)
+            cv2.ellipse(img, (460, y), (50, 20), 0, 90, 180, int(groove_depth * 0.8), sipe_thickness)
+            cv2.line(img, (120, y + 10), (195, y + 25), color=int(groove_depth * 0.7), thickness=sipe_thickness)
+            cv2.line(img, (220, y + 20), (305, y + 5), color=int(groove_depth * 0.7), thickness=sipe_thickness)
+
+    img = cv2.GaussianBlur(img, (3, 3), 0.8)
+    return cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+
+
+def render_cinturato_pattern(wear_level: float = 0.0) -> np.ndarray:
+    """
+    Renders Pirelli Cinturato P7 style tread:
+    4 wide longitudinal grooves with compact center blocks.
+    """
+    img = create_base_tread_canvas(512, 512, bg_intensity=int(46 + wear_level * 50))
+    groove_depth = int(220 * (1.0 - wear_level * 0.85))
+
+    groove_positions = [115, 210, 310, 405]
+    groove_width = max(2, int(19 * (1.0 - wear_level * 0.7)))
+
+    for x in groove_positions:
+        cv2.line(img, (x, 0), (x, 512), color=groove_depth, thickness=groove_width)
+
+    sipe_spacing = 30
+    sipe_thickness = max(1, int(3 * (1.0 - wear_level * 0.8)))
+    if wear_level < 0.8:
+        for y in range(0, 512, sipe_spacing):
+            cv2.line(img, (10, y + 10), (105, y + 20), color=int(groove_depth * 0.8), thickness=sipe_thickness)
+            cv2.rectangle(img, (130, y + 5), (195, y + 25), color=int(groove_depth * 0.65), thickness=sipe_thickness)
+            cv2.rectangle(img, (225, y + 10), (295, y + 25), color=int(groove_depth * 0.65), thickness=sipe_thickness)
+            cv2.line(img, (325, y + 20), (395, y + 10), color=int(groove_depth * 0.75), thickness=sipe_thickness)
+            cv2.line(img, (420, y + 15), (500, y + 5), color=int(groove_depth * 0.8), thickness=sipe_thickness)
+
+    img = cv2.GaussianBlur(img, (3, 3), 0.8)
+    return cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+
+
+def render_ventus_pattern(wear_level: float = 0.0) -> np.ndarray:
+    """
+    Renders Hankook Ventus Prime 4 style tread:
+    Chamfered groove edges, 3D zigzag lateral siping.
+    """
+    img = create_base_tread_canvas(512, 512, bg_intensity=int(47 + wear_level * 50))
+    groove_depth = int(220 * (1.0 - wear_level * 0.85))
+
+    groove_positions = [110, 205, 305, 410]
+    groove_width = max(2, int(18 * (1.0 - wear_level * 0.7)))
+
+    for x in groove_positions:
+        cv2.line(img, (x, 0), (x, 512), color=groove_depth, thickness=groove_width)
+
+    sipe_spacing = 36
+    sipe_thickness = max(1, int(4 * (1.0 - wear_level * 0.8)))
+    if wear_level < 0.8:
+        for y in range(0, 512, sipe_spacing):
+            # Zigzag sipes
+            pts1 = np.array([[15, y], [55, y+15], [95, y]], np.int32)
+            cv2.polylines(img, [pts1], False, color=int(groove_depth * 0.8), thickness=sipe_thickness)
+            pts2 = np.array([[125, y+5], [160, y+20], [195, y+5]], np.int32)
+            cv2.polylines(img, [pts2], False, color=int(groove_depth * 0.75), thickness=sipe_thickness)
+            pts3 = np.array([[220, y+10], [260, y+25], [295, y+10]], np.int32)
+            cv2.polylines(img, [pts3], False, color=int(groove_depth * 0.75), thickness=sipe_thickness)
+            pts4 = np.array([[320, y+5], [360, y+20], [395, y+5]], np.int32)
+            cv2.polylines(img, [pts4], False, color=int(groove_depth * 0.75), thickness=sipe_thickness)
+            pts5 = np.array([[420, y], [460, y+15], [500, y]], np.int32)
+            cv2.polylines(img, [pts5], False, color=int(groove_depth * 0.8), thickness=sipe_thickness)
+
+    img = cv2.GaussianBlur(img, (3, 3), 0.8)
+    return cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+
+
+def make_forensic_impression(
+    base_bgr: np.ndarray,
+    medium: str = "mud",
+    illumination_gradient: bool = True,
+    rotation_deg: float = 0.0,
+    crop_factor: float = 0.95
+) -> np.ndarray:
+    """
+    Simulates realistic environmental impression in mud, sandy soil, or gravel:
+    - adds medium color tint (earthy brown/clay)
+    - adds irregular soil particulate noise
+    - adds soft gradient illumination (shadows)
+    - slight rotation and perspective warp
+    """
+    h, w = base_bgr.shape[:2]
+    gray = cv2.cvtColor(base_bgr, cv2.COLOR_BGR2GRAY)
+
+    # Invert tread contact: tyre impression depresses into soil, where ribs leave grooves
+    inverted = cv2.bitwise_not(gray)
+
+    # Environmental medium tinting
+    if medium == "mud":
+        # Deep wet mud: rich dark brown-umber
+        tint_bgr = np.array([35, 55, 80], dtype=np.uint8)
+    elif medium == "soil":
+        # Dry sandy soil: light ochre-tan
+        tint_bgr = np.array([55, 85, 115], dtype=np.uint8)
+    elif medium == "sand":
+        # Coarse beach/dune sand: pale yellow-tan
+        tint_bgr = np.array([80, 115, 140], dtype=np.uint8)
+    else:
+        # Wet asphalt/dirt
+        tint_bgr = np.array([45, 60, 75], dtype=np.uint8)
+
+    # Composite textured surface
+    textured_soil = np.zeros((h, w, 3), dtype=np.uint8)
+    for c in range(3):
+        channel = (inverted.astype(np.float32) / 255.0) * tint_bgr[c] * 1.6
+        textured_soil[:, :, c] = np.clip(channel, 0, 255).astype(np.uint8)
+
+    # Add realistic environmental soil grit / granular noise
+    soil_noise = np.random.normal(0, 14, (h, w, 3)).astype(np.int16)
+    impr = np.clip(textured_soil.astype(np.int16) + soil_noise, 0, 255).astype(np.uint8)
+
+    # Irregular lighting gradient (sunlight / flashlight / shadows)
+    if illumination_gradient:
+        X, Y = np.meshgrid(np.linspace(0.7, 1.2, w), np.linspace(0.8, 1.1, h))
+        gradient = (X * Y)[:, :, np.newaxis]
+        impr = np.clip(impr.astype(np.float32) * gradient, 0, 255).astype(np.uint8)
+
+    # Slight rotation
+    if abs(rotation_deg) > 0.1:
+        M = cv2.getRotationMatrix2D((w // 2, h // 2), rotation_deg, 1.0)
+        impr = cv2.warpAffine(impr, M, (w, h), borderMode=cv2.BORDER_REFLECT)
+
+    return impr
+
+
+def generate_all_demo_assets():
+    """
+    Generate all reference patterns, forensic impressions, and wear datasets.
+    """
+    REFERENCE_PATTERNS_DIR.mkdir(parents=True, exist_ok=True)
+    FORENSIC_IMPRESSIONS_DIR.mkdir(parents=True, exist_ok=True)
+    (WEAR_DATA_DIR / "good").mkdir(parents=True, exist_ok=True)
+    (WEAR_DATA_DIR / "moderate").mkdir(parents=True, exist_ok=True)
+    (WEAR_DATA_DIR / "worn").mkdir(parents=True, exist_ok=True)
+
+    print("Generating reference tread patterns...")
+    pattern_generators = {
+        "michelin_primacy4.jpg": render_primacy4_pattern,
+        "continental_premiumcontact6.jpg": render_premiumcontact6_pattern,
+        "bridgestone_turanza_t005.jpg": render_turanza_pattern,
+        "goodyear_efficientgrip2.jpg": render_efficientgrip_pattern,
+        "pirelli_cinturato_p7.jpg": render_cinturato_pattern,
+        "hankook_ventus_prime4.jpg": render_ventus_pattern,
+    }
+
+    ref_images = {}
+    for filename, gen_fn in pattern_generators.items():
+        img = gen_fn(wear_level=0.0)
+        save_path = REFERENCE_PATTERNS_DIR / filename
+        cv2.imwrite(str(save_path), img)
+        ref_images[filename] = img
+        print(f"  [+] Reference: {save_path.name}")
+
+    print("\nGenerating simulated crime-scene impressions...")
+    crime_scenes = [
+        ("impression_crime_scene_01_mud_michelin.jpg", ref_images["michelin_primacy4.jpg"], "mud", -2.5),
+        ("impression_crime_scene_02_soil_continental.jpg", ref_images["continental_premiumcontact6.jpg"], "soil", 3.0),
+        ("impression_crime_scene_03_dirt_bridgestone.jpg", ref_images["bridgestone_turanza_t005.jpg"], "dirt", 1.5),
+        ("impression_crime_scene_04_sand_goodyear.jpg", ref_images["goodyear_efficientgrip2.jpg"], "sand", -4.0),
+        ("impression_crime_scene_05_mud_pirelli.jpg", ref_images["pirelli_cinturato_p7.jpg"], "mud", 2.0),
+    ]
+
+    for filename, base_img, medium, rot in crime_scenes:
+        impr = make_forensic_impression(base_img, medium=medium, rotation_deg=rot)
+        save_path = FORENSIC_IMPRESSIONS_DIR / filename
+        cv2.imwrite(str(save_path), impr)
+        print(f"  [+] Forensic Impression: {save_path.name}")
+
+    print("\nGenerating calibrated physical-tyre grouped wear dataset...")
+    # Generate images grouped by physical tyre id to ensure anti-leakage grouping!
+    # Physical tyres:
+    # Good: tyre_g01, tyre_g02, tyre_g03, tyre_g04 (wear 0.0 - 0.20)
+    # Moderate: tyre_m01, tyre_m02, tyre_m03, tyre_m04 (wear 0.40 - 0.60)
+    # Worn: tyre_w01, tyre_w02, tyre_w03, tyre_w04 (wear 0.80 - 0.95)
+
+    tyre_types = [
+        render_primacy4_pattern,
+        render_premiumcontact6_pattern,
+        render_turanza_pattern,
+        render_efficientgrip_pattern,
+        render_cinturato_pattern,
+        render_ventus_pattern
+    ]
+
+    # Generate Good class
+    for i in range(1, 5):
+        tyre_id = f"tyre_g0{i}"
+        gen = tyre_types[(i - 1) % len(tyre_types)]
+        for angle_idx, rot in enumerate([0.0, 3.0, -3.0]):
+            wear = np.random.uniform(0.05, 0.20)
+            base = gen(wear_level=wear)
+            if abs(rot) > 0.1:
+                M = cv2.getRotationMatrix2D((256, 256), rot, 1.0)
+                base = cv2.warpAffine(base, M, (512, 512), borderMode=cv2.BORDER_REFLECT)
+            # Add slight lighting variation
+            gain = np.random.uniform(0.9, 1.1)
+            final_img = np.clip(base.astype(np.float32) * gain, 0, 255).astype(np.uint8)
+            fname = f"{tyre_id}_view{angle_idx + 1}.jpg"
+            cv2.imwrite(str(WEAR_DATA_DIR / "good" / fname), final_img)
+
+    # Generate Moderate class
+    for i in range(1, 5):
+        tyre_id = f"tyre_m0{i}"
+        gen = tyre_types[(i + 1) % len(tyre_types)]
+        for angle_idx, rot in enumerate([0.0, 4.0, -4.0]):
+            wear = np.random.uniform(0.45, 0.60)
+            base = gen(wear_level=wear)
+            if abs(rot) > 0.1:
+                M = cv2.getRotationMatrix2D((256, 256), rot, 1.0)
+                base = cv2.warpAffine(base, M, (512, 512), borderMode=cv2.BORDER_REFLECT)
+            gain = np.random.uniform(0.9, 1.1)
+            final_img = np.clip(base.astype(np.float32) * gain, 0, 255).astype(np.uint8)
+            fname = f"{tyre_id}_view{angle_idx + 1}.jpg"
+            cv2.imwrite(str(WEAR_DATA_DIR / "moderate" / fname), final_img)
+
+    # Generate Worn class
+    for i in range(1, 5):
+        tyre_id = f"tyre_w0{i}"
+        gen = tyre_types[(i + 3) % len(tyre_types)]
+        for angle_idx, rot in enumerate([0.0, 5.0, -5.0]):
+            wear = np.random.uniform(0.80, 0.95)
+            base = gen(wear_level=wear)
+            if abs(rot) > 0.1:
+                M = cv2.getRotationMatrix2D((256, 256), rot, 1.0)
+                base = cv2.warpAffine(base, M, (512, 512), borderMode=cv2.BORDER_REFLECT)
+            gain = np.random.uniform(0.9, 1.1)
+            final_img = np.clip(base.astype(np.float32) * gain, 0, 255).astype(np.uint8)
+            fname = f"{tyre_id}_view{angle_idx + 1}.jpg"
+            cv2.imwrite(str(WEAR_DATA_DIR / "worn" / fname), final_img)
+
+    print("  [+] Wear dataset generated successfully with physical tyre grouping.")
+    print("Done generating all demo assets.")
+
+
+if __name__ == "__main__":
+    generate_all_demo_assets()
