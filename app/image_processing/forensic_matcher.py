@@ -1,12 +1,12 @@
 """
 TreadVision: Forensic Tread Impression Analysis and Multi-Criteria Similarity Engine
 Matches photographed crime-scene tyre impressions (in mud, soil, sand, dirt)
-against verified reference tyre tread patterns.
+against verified reference tyre tread patterns using documented mathematical metrics.
 """
 from typing import Dict, Any, List, Tuple, Optional
+from pathlib import Path
 import numpy as np
 import cv2
-from scipy.spatial.distance import cosine, euclidean
 
 from app.config import FORENSIC_WEIGHTS
 from app.image_processing.pipeline import ImageProcessingPipeline, PipelineResult
@@ -25,7 +25,7 @@ class ForensicMatchCandidate:
         symmetry: str,
         similarity_score: float,
         confidence_level: str,
-        component_scores: Dict[str, float],
+        component_scores: Dict[str, Any],
         reference_image_path: str,
         available_sizes: List[str],
         compatible_vehicles: List[str],
@@ -67,6 +67,19 @@ class ForensicMatchCandidate:
 class ForensicMatcher:
     """
     Forensic impression matching engine with multi-criteria feature fusion.
+
+    Mathematical Formulation:
+      - Edge similarity:    S_edge    = 1.0 - (L1_norm_edge / max_L1_edge)
+      - Texture similarity: S_texture = 1.0 - (L1_norm_texture / max_L1_texture)
+      - Shape similarity:   S_shape   = 1.0 - (L1_norm_shape / max_L1_shape)
+      - Local similarity:   S_local   = good_matches / min(des1, des2)   [if matches > 0]
+                                      None                                [if 0 matches or keypoints < 2]
+
+      Overall Similarity:
+        When local features available:
+          S_overall = (w_e * S_e + w_t * S_t + w_s * S_s + w_l * S_l) / (w_e + w_t + w_s + w_l)
+        When local features insufficient:
+          S_overall = (w_e * S_e + w_t * S_t + w_s * S_s) / (w_e + w_t + w_s)
     """
 
     FORENSIC_DISCLAIMER = (
@@ -78,15 +91,14 @@ class ForensicMatcher:
     )
 
     def __init__(self, weights: Optional[Dict[str, float]] = None):
-        self.weights = weights or FORENSIC_WEIGHTS
+        self.weights = weights or FORENSIC_WEIGHTS.copy()
         self.pipeline = ImageProcessingPipeline(
             target_size=(512, 512),
             noise_method="bilateral",
             contrast_method="clahe",
-            clahe_clip_limit=3.0,  # Slightly higher contrast for degraded impressions
-            segmentation_method="adaptive"  # Adaptive thresholding handles uneven mud/soil lighting
+            clahe_clip_limit=3.0,
+            segmentation_method="adaptive"
         )
-        # ORB local keypoint detector for invariant structural feature matching
         self.orb = cv2.ORB_create(nfeatures=500, scaleFactor=1.2, nlevels=8)
         self.matcher = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=False)
 
@@ -95,15 +107,8 @@ class ForensicMatcher:
         impression_input: Any,
         perspective_pts: Optional[np.ndarray] = None
     ) -> PipelineResult:
-        """
-        Preprocess the crime-scene impression image, applying perspective correction
-        if 4 corner points are provided, followed by contrast enhancement and edge extraction.
-        """
-        # If perspective correction coordinates provided:
+        """Preprocess crime-scene impression image with optional perspective correction."""
         if perspective_pts is not None and len(perspective_pts) == 4:
-            # Warp perspective to top-down view
-            is_valid, _, cv_img = self.pipeline.process(impression_input).stages.get("Original"), "", None
-            # Standard wrap
             pts1 = np.float32(perspective_pts)
             pts2 = np.float32([[0, 0], [512, 0], [512, 512], [0, 512]])
             matrix = cv2.getPerspectiveTransform(pts1, pts2)
@@ -116,14 +121,20 @@ class ForensicMatcher:
         self,
         query_gray: np.ndarray,
         ref_image_path: str
-    ) -> Tuple[float, int]:
+    ) -> Tuple[Optional[float], int, str]:
         """
         Compute local keypoint similarity using ORB descriptors and Lowe's ratio test.
+        Returns:
+            (local_score, match_count, status_str)
+            Where local_score is None if insufficient keypoints or 0 matches.
         """
+        if not ref_image_path or not Path(ref_image_path).exists():
+            return None, 0, "INSUFFICIENT_LOCAL_FEATURES"
+
         try:
             ref_bgr = cv2.imread(ref_image_path)
             if ref_bgr is None:
-                return 0.5, 0
+                return None, 0, "INSUFFICIENT_LOCAL_FEATURES"
 
             ref_gray = cv2.cvtColor(ref_bgr, cv2.COLOR_BGR2GRAY)
             ref_gray = cv2.resize(ref_gray, (512, 512))
@@ -132,7 +143,7 @@ class ForensicMatcher:
             kp2, des2 = self.orb.detectAndCompute(ref_gray, None)
 
             if des1 is None or des2 is None or len(des1) < 2 or len(des2) < 2:
-                return 0.4, 0
+                return None, 0, "INSUFFICIENT_LOCAL_FEATURES"
 
             matches = self.matcher.knnMatch(des1, des2, k=2)
             good_matches = []
@@ -143,14 +154,15 @@ class ForensicMatcher:
                         good_matches.append(m)
 
             match_count = len(good_matches)
+            if match_count == 0:
+                return None, 0, "INSUFFICIENT_LOCAL_FEATURES"
+
             max_possible = min(len(des1), len(des2))
             ratio = float(match_count / max_possible) if max_possible > 0 else 0.0
-
-            # Scale ratio into [0.3, 0.95] range
-            local_score = min(0.98, max(0.20, 0.30 + ratio * 1.8))
-            return local_score, match_count
+            local_score = float(np.clip(ratio, 0.0, 1.0))
+            return local_score, match_count, "AVAILABLE"
         except Exception:
-            return 0.5, 0
+            return None, 0, "INSUFFICIENT_LOCAL_FEATURES"
 
     def calculate_similarity(
         self,
@@ -158,85 +170,92 @@ class ForensicMatcher:
         query_gray: np.ndarray,
         db_tyre_features: Dict[str, Any],
         ref_image_path: str
-    ) -> Tuple[float, Dict[str, float]]:
+    ) -> Tuple[float, Dict[str, Any]]:
         """
-        Calculate documented multi-criteria similarity score:
-        S_overall = w_edge * S_edge + w_texture * S_texture + w_shape * S_shape + w_local * S_local
+        Calculate documented multi-criteria similarity score with bounded mathematical metrics:
+        Edge, Texture, and Shape use bounded L1 distances: S = 1.0 - (L1_norm / max_L1).
+        When ORB matching fails (insufficient keypoints), weights are renormalized across available metrics.
         """
-        # 1. Edge Similarity (Density & directional distribution)
+        # 1. Edge Similarity: Bounded L1 distance on density and directional distribution
         q_edge = query_features.get("edge", {})
         r_edge = db_tyre_features.get("edge", {})
 
-        q_density = q_edge.get("total_edge_density", 0.05)
-        r_density = r_edge.get("total_edge_density", 0.05)
-        density_diff = abs(q_density - r_density) / (max(q_density, r_density) + 1e-4)
-        edge_sim = max(0.1, 1.0 - density_diff)
+        q_density = float(q_edge.get("total_edge_density", 0.0))
+        r_density = float(r_edge.get("total_edge_density", 0.0))
+        diff_density = abs(q_density - r_density)  # max 1.0
 
-        # Directional factor
-        q_horiz = q_edge.get("horizontal_edge_density", 0.0)
-        r_horiz = r_edge.get("horizontal_edge_density", 0.0)
-        horiz_diff = abs(q_horiz - r_horiz) / (max(q_horiz, r_horiz) + 1e-4)
-        edge_score = 0.6 * edge_sim + 0.4 * max(0.1, 1.0 - horiz_diff)
+        q_horiz = float(q_edge.get("horizontal_edge_density", 0.0))
+        r_horiz = float(r_edge.get("horizontal_edge_density", 0.0))
+        diff_horiz = abs(q_horiz - r_horiz)  # max 1.0
 
-        # 2. Texture Similarity (GLCM contrast, homogeneity, correlation cosine similarity)
+        q_vert = float(q_edge.get("vertical_edge_density", 0.0))
+        r_vert = float(r_edge.get("vertical_edge_density", 0.0))
+        diff_vert = abs(q_vert - r_vert)  # max 1.0
+
+        # L1 edge norm with sub-weights summing to 1.0 (max possible = 1.0)
+        l1_edge = 0.5 * diff_density + 0.3 * diff_horiz + 0.2 * diff_vert
+        edge_score = float(np.clip(1.0 - l1_edge, 0.0, 1.0))
+
+        # 2. Texture Similarity: Bounded L1 distance on normalized GLCM properties
         q_tex = query_features.get("texture", {})
         r_tex = db_tyre_features.get("texture", {})
 
-        q_vec = np.array([
-            q_tex.get("contrast", 1.0) / 10.0,
-            q_tex.get("dissimilarity", 1.0) / 5.0,
-            q_tex.get("homogeneity", 0.5),
-            q_tex.get("energy", 0.2),
-            (q_tex.get("correlation", 0.5) + 1.0) / 2.0,
-            q_tex.get("ASM", 0.1)
-        ])
-        r_vec = np.array([
-            r_tex.get("contrast", 1.0) / 10.0,
-            r_tex.get("dissimilarity", 1.0) / 5.0,
-            r_tex.get("homogeneity", 0.5),
-            r_tex.get("energy", 0.2),
-            (r_tex.get("correlation", 0.5) + 1.0) / 2.0,
-            r_tex.get("ASM", 0.1)
-        ])
+        diff_contrast = min(1.0, abs(float(q_tex.get("contrast", 0.0)) - float(r_tex.get("contrast", 0.0))) / 50.0)
+        diff_dissim = min(1.0, abs(float(q_tex.get("dissimilarity", 0.0)) - float(r_tex.get("dissimilarity", 0.0))) / 20.0)
+        diff_homo = min(1.0, abs(float(q_tex.get("homogeneity", 0.0)) - float(r_tex.get("homogeneity", 0.0))))
+        diff_energy = min(1.0, abs(float(q_tex.get("energy", 0.0)) - float(r_tex.get("energy", 0.0))))
+        diff_corr = min(1.0, abs(float(q_tex.get("correlation", 0.0)) - float(r_tex.get("correlation", 0.0))) / 2.0)
+        diff_asm = min(1.0, abs(float(q_tex.get("ASM", 0.0)) - float(r_tex.get("ASM", 0.0))))
 
-        norm_q = np.linalg.norm(q_vec)
-        norm_r = np.linalg.norm(r_vec)
-        if norm_q > 0 and norm_r > 0:
-            texture_score = float(np.dot(q_vec, r_vec) / (norm_q * norm_r))
+        l1_texture = (diff_contrast + diff_dissim + diff_homo + diff_energy + diff_corr + diff_asm) / 6.0
+        texture_score = float(np.clip(1.0 - l1_texture, 0.0, 1.0))
+
+        # 3. Shape Similarity: Bounded L1 distance on shape and invariant moments
+        q_shape = query_features.get("shape", {})
+        r_shape = db_tyre_features.get("shape", {})
+
+        diff_area = min(1.0, abs(float(q_shape.get("area_ratio", 0.0)) - float(r_shape.get("area_ratio", 0.0))))
+        diff_solid = min(1.0, abs(float(q_shape.get("solidity", 0.0)) - float(r_shape.get("solidity", 0.0))))
+        diff_circ = min(1.0, abs(float(q_shape.get("circularity", 0.0)) - float(r_shape.get("circularity", 0.0))))
+
+        q_hu = np.array(q_shape.get("hu_moments", [0.0]*7), dtype=float)
+        r_hu = np.array(r_shape.get("hu_moments", [0.0]*7), dtype=float)
+        if len(q_hu) == 7 and len(r_hu) == 7:
+            diff_hu = min(1.0, float(np.mean(np.abs(q_hu - r_hu)) / 15.0))
         else:
-            texture_score = 0.5
-        texture_score = max(0.1, min(0.99, texture_score))
+            diff_hu = 0.5
 
-        # 3. Shape Similarity (Hu moments exponential distance & solidity)
-        q_hu = np.array(query_features.get("shape", {}).get("hu_moments", [0.0]*7))
-        r_hu = np.array(db_tyre_features.get("shape", {}).get("hu_moments", [0.0]*7))
-        hu_dist = np.linalg.norm(q_hu - r_hu)
-        shape_hu_sim = float(np.exp(-0.25 * hu_dist))
+        l1_shape = 0.25 * diff_hu + 0.25 * diff_solid + 0.25 * diff_circ + 0.25 * diff_area
+        shape_score = float(np.clip(1.0 - l1_shape, 0.0, 1.0))
 
-        q_solid = query_features.get("shape", {}).get("solidity", 0.5)
-        r_solid = db_tyre_features.get("shape", {}).get("solidity", 0.5)
-        solid_sim = max(0.1, 1.0 - abs(q_solid - r_solid))
-        shape_score = 0.6 * shape_hu_sim + 0.4 * solid_sim
+        # 4. Local Pattern Keypoint Similarity (ORB)
+        local_score, match_count, local_status = self.compute_local_similarity(query_gray, ref_image_path)
 
-        # 4. Local Pattern Keypoint Similarity (ORB feature matching)
-        local_score, _ = self.compute_local_similarity(query_gray, ref_image_path)
+        # 5. Weighted Combination with Renormalization on Missing Local Features
+        w_e = self.weights.get("edge", 0.30)
+        w_t = self.weights.get("texture", 0.25)
+        w_s = self.weights.get("shape", 0.25)
+        w_l = self.weights.get("local", 0.20)
 
-        # Weighted aggregation
-        w = self.weights
-        overall_score = (
-            w["edge"] * edge_score +
-            w["texture"] * texture_score +
-            w["shape"] * shape_score +
-            w["local"] * local_score
-        ) * 100.0
+        if local_score is not None:
+            w_total = w_e + w_t + w_s + w_l
+            overall = (w_e * edge_score + w_t * texture_score + w_s * shape_score + w_l * local_score) / w_total
+            local_pct = round(float(local_score * 100.0), 1)
+        else:
+            # Renormalize component weights across remaining available metrics
+            w_total = w_e + w_t + w_s
+            overall = (w_e * edge_score + w_t * texture_score + w_s * shape_score) / w_total
+            local_pct = None
 
-        overall_score = max(15.0, min(96.5, overall_score))
+        overall_score = round(float(np.clip(overall * 100.0, 0.0, 100.0)), 1)
 
         component_scores = {
             "edge_similarity": round(float(edge_score * 100.0), 1),
             "texture_similarity": round(float(texture_score * 100.0), 1),
             "shape_similarity": round(float(shape_score * 100.0), 1),
-            "local_pattern_similarity": round(float(local_score * 100.0), 1)
+            "local_pattern_similarity": local_pct,
+            "local_feature_status": local_status,
+            "local_match_count": match_count
         }
 
         return overall_score, component_scores
@@ -247,9 +266,7 @@ class ForensicMatcher:
         db_records: List[Dict[str, Any]],
         top_k: int = 5
     ) -> List[ForensicMatchCandidate]:
-        """
-        Rank reference database tyres against the processed impression.
-        """
+        """Rank reference database tyres against the processed impression."""
         if not query_result.success:
             return []
 
@@ -267,13 +284,13 @@ class ForensicMatcher:
                 ref_image_path=ref_image_path
             )
 
-            # Assign academic confidence tier
-            if sim_score >= 85.0:
-                confidence = "High Similarity Match"
-            elif sim_score >= 70.0:
-                confidence = "Moderate Similarity Candidate"
+            # Assign similarity tier
+            if sim_score >= 80.0:
+                similarity_tier = "High Similarity Match"
+            elif sim_score >= 60.0:
+                similarity_tier = "Moderate Similarity Candidate"
             else:
-                confidence = "Low Similarity Lead"
+                similarity_tier = "Low Similarity Lead"
 
             candidate = ForensicMatchCandidate(
                 rank=0,
@@ -284,7 +301,7 @@ class ForensicMatcher:
                 pattern_type=record.get("pattern_type", "Asymmetric"),
                 symmetry=record.get("symmetry", "Asymmetric"),
                 similarity_score=sim_score,
-                confidence_level=confidence,
+                confidence_level=similarity_tier,
                 component_scores=comp_scores,
                 reference_image_path=ref_image_path,
                 available_sizes=record.get("sizes", []),

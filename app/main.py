@@ -40,7 +40,7 @@ def ensure_system_initialized():
 
 
 def main():
-    # Apply warm off-white automotive engineering theme
+    # Apply dark automotive engineering theme
     apply_theme()
 
     # Self-healing database initialization
@@ -53,11 +53,11 @@ def main():
     # Sidebar Navigation & Branding
     with st.sidebar:
         st.markdown("""
-        <div style="padding-bottom: 1.25rem; margin-bottom: 1.5rem; border-bottom: 1px solid #34373B;">
-            <div style="font-family: 'IBM Plex Sans', sans-serif; font-size: 1.15rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #F2F2F0;">
+        <div style="padding-bottom: 1.25rem; margin-bottom: 1.5rem; border-bottom: 1px solid #41434E;">
+            <div style="font-family: 'IBM Plex Sans', sans-serif; font-size: 1.15rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #F2F2F4;">
                 TREADVISION
             </div>
-            <div style="font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: #A51F32; font-weight: 600; margin-top: 2px;">
+            <div style="font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: #D8125B; font-weight: 600; margin-top: 2px;">
                 TYRE INTELLIGENCE PLATFORM
             </div>
         </div>
@@ -89,8 +89,8 @@ def main():
 
         st.markdown("---")
         st.markdown("""
-        <div style="font-size: 0.78rem; color: #A7A8A5; line-height: 1.6;">
-            <div style="font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #F2F2F0; margin-bottom: 6px;">
+        <div style="font-size: 0.78rem; color: #B4B5BC; line-height: 1.6;">
+            <div style="font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #F2F2F4; margin-bottom: 6px;">
                 TECHNICAL FOUNDATIONS
             </div>
             Digital Image Processing<br>
@@ -101,9 +101,9 @@ def main():
             Stratified Group Splitting<br>
             Multi-Criteria Similarity
         </div>
-        <div style="margin-top: 18px; padding-top: 12px; border-top: 1px solid #34373B; font-size: 0.74rem; color: #A7A8A5;">
-            Repository: <span class="tv-mono" style="color: #F2F2F0;">TreadVision</span><br>
-            Evaluation: <span class="tv-mono" style="color: #A51F32;">Validation Set</span>
+        <div style="margin-top: 18px; padding-top: 12px; border-top: 1px solid #41434E; font-size: 0.74rem; color: #B4B5BC;">
+            Repository: <span class="tv-mono" style="color: #F2F2F4;">TreadVision</span><br>
+            Evaluation: <span class="tv-mono" style="color: #D8125B;">Calibrated Validation Set</span>
         </div>
         """, unsafe_allow_html=True)
 

@@ -34,7 +34,7 @@ def render_replacement():
 
         with col_current:
             st.markdown("""
-            <div style="font-size: 0.76rem; letter-spacing: 0.08em; text-transform: uppercase; color: #F2F2F0; font-weight: 700; margin-bottom: 8px;">
+            <div style="font-size: 0.76rem; letter-spacing: 0.08em; text-transform: uppercase; color: #F2F2F4; font-weight: 700; margin-bottom: 8px;">
                 CURRENT TYRE PROFILE
             </div>
             """, unsafe_allow_html=True)
@@ -51,17 +51,17 @@ def render_replacement():
             sizes_str = ", ".join([s.formatted_size for s in current_tyre.sizes])
 
             st.markdown(f"""
-            <div style="background: #17191C; border: 1px solid #34373B; border-radius: 4px; padding: 18px; margin-top: 10px;">
-                <div style="font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: #A51F32; font-weight: 600;">
+            <div style="background: #23252E; border: 1px solid #41434E; border-radius: 4px; padding: 18px; margin-top: 10px;">
+                <div style="font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: #D8125B; font-weight: 600;">
                     CURRENT TYRE
                 </div>
-                <div style="font-size: 1.25rem; font-weight: 700; color: #F2F2F0; margin: 4px 0;">
+                <div style="font-size: 1.25rem; font-weight: 700; color: #F2F2F4; margin: 4px 0;">
                     {current_tyre.manufacturer.upper()} {current_tyre.model.upper()}
                 </div>
-                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; color: #F2F2F0; margin-bottom: 8px;">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; color: #F2F2F4; margin-bottom: 8px;">
                     {sizes_str if sizes_str else 'Standard OEM Specifications'}
                 </div>
-                <div style="font-size: 0.8rem; color: #A7A8A5;">
+                <div style="font-size: 0.8rem; color: #B4B5BC;">
                     Category: {current_tyre.category} &nbsp;|&nbsp; Construction: {current_tyre.construction}
                 </div>
             </div>
@@ -69,7 +69,7 @@ def render_replacement():
 
         with col_depth:
             st.markdown("""
-            <div style="font-size: 0.76rem; letter-spacing: 0.08em; text-transform: uppercase; color: #F2F2F0; font-weight: 700; margin-bottom: 8px;">
+            <div style="font-size: 0.76rem; letter-spacing: 0.08em; text-transform: uppercase; color: #F2F2F4; font-weight: 700; margin-bottom: 8px;">
                 REFERENCE TREAD DEPTH
             </div>
             """, unsafe_allow_html=True)
@@ -87,18 +87,18 @@ def render_replacement():
                 )
 
             st.markdown(f"""
-            <div style="background: #17191C; border: 1px solid #34373B; border-radius: 4px; padding: 16px; margin-top: 10px;">
-                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 1.2rem; font-weight: 600; color: #A51F32;">
+            <div style="background: #23252E; border: 1px solid #41434E; border-radius: 4px; padding: 16px; margin-top: 10px;">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 1.2rem; font-weight: 600; color: #D8125B;">
                     {LEGAL_MINIMUM_DEPTH_MM:.1f} mm
                 </div>
-                <div style="font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: #F2F2F0; font-weight: 600; margin-bottom: 6px;">
+                <div style="font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: #F2F2F4; font-weight: 600; margin-bottom: 6px;">
                     Reference Legal Minimum
                 </div>
-                <div style="font-size: 0.78rem; color: #A7A8A5; line-height: 1.45;">
+                <div style="font-size: 0.78rem; color: #B4B5BC; line-height: 1.45;">
                     Applicable legal tread-depth requirements vary by jurisdiction.
                     Consult the relevant local regulations and tyre manufacturer guidance.
                 </div>
-                <div style="border-top: 1px solid #34373B; margin-top: 10px; padding-top: 8px; font-size: 0.76rem; color: #A7A8A5;">
+                <div style="border-top: 1px solid #41434E; margin-top: 10px; padding-top: 8px; font-size: 0.76rem; color: #B4B5BC;">
                     Wet Weather Advisory: <span class="tv-mono">{WET_WEATHER_RECOMMENDED_DEPTH_MM:.1f} mm</span><br>
                     Winter Advisory: <span class="tv-mono">{WINTER_RECOMMENDED_DEPTH_MM:.1f} mm</span>
                 </div>
@@ -143,32 +143,32 @@ def render_replacement():
 
         # Recommendation Display Card
         st.markdown(f"""
-        <div style="background: #17191C; border: 1px solid #34373B; border-left: 4px solid #A51F32; border-radius: 4px; padding: 22px 24px; margin-bottom: 24px;">
+        <div style="background: #23252E; border: 1px solid #41434E; border-left: 4px solid #D8125B; border-radius: 4px; padding: 22px 24px; margin-bottom: 24px;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;">
                 <div>
-                    <div style="font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: #A51F32; font-weight: 700;">
+                    <div style="font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: #D8125B; font-weight: 700;">
                         CURRENT CONDITION
                     </div>
-                    <div style="font-size: 1.4rem; font-weight: 700; color: #F2F2F0; margin: 2px 0 10px 0;">
+                    <div style="font-size: 1.4rem; font-weight: 700; color: #F2F2F4; margin: 2px 0 10px 0;">
                         {condition_label}
                     </div>
                 </div>
-                <div style="font-size: 0.76rem; color: #A7A8A5;">
+                <div style="font-size: 0.76rem; color: #B4B5BC;">
                     {source_note}
                 </div>
             </div>
 
-            <div style="border-top: 1px solid #24272B; padding-top: 14px; margin-top: 6px;">
-                <div style="font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: #A7A8A5; font-weight: 600;">
+            <div style="border-top: 1px solid #30323D; padding-top: 14px; margin-top: 6px;">
+                <div style="font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: #B4B5BC; font-weight: 600;">
                     RECOMMENDATION
                 </div>
-                <div style="font-size: 1.25rem; font-weight: 600; color: #F2F2F0; margin: 4px 0 8px 0;">
+                <div style="font-size: 1.25rem; font-weight: 600; color: #F2F2F4; margin: 4px 0 8px 0;">
                     {eval_res['action']}
                 </div>
-                <div style="font-size: 0.9rem; color: #A7A8A5; line-height: 1.6;">
+                <div style="font-size: 0.9rem; color: #B4B5BC; line-height: 1.6;">
                     {eval_res['advice']}
                 </div>
-                {f'<div style="margin-top: 10px; font-size: 0.82rem; color: #C12A3E; font-weight: 600;">NOTICE: {eval_res["depth_note"]}</div>' if eval_res.get('depth_note') else ''}
+                {f'<div style="margin-top: 10px; font-size: 0.82rem; color: #EF246D; font-weight: 600;">NOTICE: {eval_res["depth_note"]}</div>' if eval_res.get('depth_note') else ''}
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -177,33 +177,33 @@ def render_replacement():
         replacements = ReplacementAdvisor.find_replacements_for_tyre(selected_tyre_id, session)
 
         st.markdown("""
-        <div style="font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: #F2F2F0; font-weight: 700; margin-bottom: 12px;">
+        <div style="font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: #F2F2F4; font-weight: 700; margin-bottom: 12px;">
             REPLACEMENT OPTIONS
         </div>
         """, unsafe_allow_html=True)
 
         if replacements:
-            st.markdown(f"<div style='font-size: 0.85rem; color: #A7A8A5; margin-bottom: 14px;'>Identified {len(replacements)} verified database replacements sharing compatible dimensional specifications:</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='font-size: 0.85rem; color: #B4B5BC; margin-bottom: 14px;'>Identified {len(replacements)} verified database replacements sharing compatible dimensional specifications:</div>", unsafe_allow_html=True)
 
             rep_cols = st.columns(min(3, max(1, len(replacements))), gap="medium")
             for idx, rep in enumerate(replacements):
                 target_col = rep_cols[idx % len(rep_cols)]
                 with target_col:
                     st.markdown(f"""
-                    <div style="background: #17191C; border: 1px solid #34373B; border-radius: 4px; padding: 18px; margin-bottom: 16px; height: 100%;">
-                        <div style="font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: #A51F32; font-weight: 600;">
+                    <div style="background: #23252E; border: 1px solid #41434E; border-radius: 4px; padding: 18px; margin-bottom: 16px; height: 100%;">
+                        <div style="font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: #D8125B; font-weight: 600;">
                             {rep['category']}
                         </div>
-                        <div style="font-size: 1.15rem; font-weight: 700; color: #F2F2F0; margin: 4px 0;">
+                        <div style="font-size: 1.15rem; font-weight: 700; color: #F2F2F4; margin: 4px 0;">
                             {rep['manufacturer']} {rep['model']}
                         </div>
-                        <div style="font-size: 0.82rem; color: #A7A8A5; margin-bottom: 8px;">
+                        <div style="font-size: 0.82rem; color: #B4B5BC; margin-bottom: 8px;">
                             Pattern Geometry: {rep['pattern_type']}
                         </div>
-                        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.76rem; color: #F2F2F0; background: #1E2024; padding: 6px 10px; border-radius: 3px; border: 1px solid #34373B; margin-bottom: 8px;">
+                        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.76rem; color: #F2F2F4; background: #282A34; padding: 6px 10px; border-radius: 3px; border: 1px solid #41434E; margin-bottom: 8px;">
                             Sizes: {', '.join(rep['shared_sizes'])}
                         </div>
-                        <div style="font-size: 0.8rem; color: #A7A8A5; line-height: 1.45;">
+                        <div style="font-size: 0.8rem; color: #B4B5BC; line-height: 1.45;">
                             {rep['description']}
                         </div>
                     </div>
@@ -218,7 +218,7 @@ def render_replacement():
 
         # Standard Safety Notice
         st.markdown(f"""
-        <div style="margin-top: 24px; padding: 14px 18px; background: #1E2024; border-radius: 4px; border: 1px solid #34373B; color: #A7A8A5; font-size: 0.8rem; line-height: 1.5;">
+        <div style="margin-top: 24px; padding: 14px 18px; background: #282A34; border-radius: 4px; border: 1px solid #41434E; color: #B4B5BC; font-size: 0.8rem; line-height: 1.5;">
             {eval_res['disclaimer']}
         </div>
         """, unsafe_allow_html=True)

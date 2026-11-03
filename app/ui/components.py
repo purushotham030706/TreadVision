@@ -10,12 +10,12 @@ import pandas as pd
 def render_header(title: str, subtitle: str = ""):
     """Standard technical page header."""
     st.markdown(f"""
-    <div style="margin-bottom: 24px; padding-bottom: 14px; border-bottom: 1px solid #34373B;">
-        <div style="font-size: 0.76rem; letter-spacing: 0.12em; text-transform: uppercase; color: #A51F32; font-weight: 600; margin-bottom: 4px;">
+    <div style="margin-bottom: 24px; padding-bottom: 14px; border-bottom: 1px solid #41434E;">
+        <div style="font-size: 0.76rem; letter-spacing: 0.12em; text-transform: uppercase; color: #D8125B; font-weight: 600; margin-bottom: 4px;">
             TREADVISION
         </div>
-        <h1 style="color: #F2F2F0; margin: 0 0 6px 0; font-size: 1.85rem; font-weight: 600;">{title}</h1>
-        {f'<div style="color: #A7A8A5; font-size: 0.95rem; line-height: 1.5;">{subtitle}</div>' if subtitle else ''}
+        <h1 style="color: #F2F2F4; margin: 0 0 6px 0; font-size: 1.85rem; font-weight: 600;">{title}</h1>
+        {f'<div style="color: #B4B5BC; font-size: 0.95rem; line-height: 1.5;">{subtitle}</div>' if subtitle else ''}
     </div>
     """, unsafe_allow_html=True)
 

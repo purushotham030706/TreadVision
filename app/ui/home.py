@@ -9,15 +9,15 @@ def render_home():
     """Render concise, dark engineering overview page without decorative images or redundant library counts."""
     # Top Header
     st.markdown("""
-    <div style="margin-bottom: 28px; padding-bottom: 18px; border-bottom: 1px solid #34373B;">
-        <div style="font-size: 0.76rem; letter-spacing: 0.14em; text-transform: uppercase; color: #A51F32; font-weight: 700; margin-bottom: 6px;">
+    <div style="margin-bottom: 28px; padding-bottom: 18px; border-bottom: 1px solid #41434E;">
+        <div style="font-size: 0.76rem; letter-spacing: 0.14em; text-transform: uppercase; color: #D8125B; font-weight: 700; margin-bottom: 6px;">
             TREADVISION
         </div>
-        <h1 style="color: #F2F2F0; font-size: 2.1rem; font-weight: 700; margin: 0 0 8px 0; letter-spacing: -0.02em;">
+        <h1 style="color: #F2F2F4; font-size: 2.1rem; font-weight: 700; margin: 0 0 8px 0; letter-spacing: -0.02em;">
             INTELLIGENT TREAD ANALYSIS
         </h1>
-        <div style="font-size: 1rem; color: #A7A8A5; line-height: 1.5; max-width: 820px;">
-            Computer vision for tyre condition, tread identification and vehicle fitment.
+        <div style="font-size: 1rem; color: #B4B5BC; line-height: 1.5; max-width: 820px;">
+            Computer vision for tyre condition, tread identification and vehicle fitment intelligence.
             Grounded in digital image processing, morphological edge statistics, GLCM texture matrices,
             and multi-criteria forensic similarity matching.
         </div>
@@ -26,26 +26,26 @@ def render_home():
 
     # Workflow Architecture Introduction
     st.markdown("""
-    <div style="background: #17191C; border: 1px solid #34373B; border-radius: 4px; padding: 20px 24px; margin-bottom: 24px;">
-        <div style="font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: #A51F32; font-weight: 700; margin-bottom: 6px;">
+    <div style="background: #23252E; border: 1px solid #41434E; border-radius: 4px; padding: 20px 24px; margin-bottom: 24px;">
+        <div style="font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: #D8125B; font-weight: 700; margin-bottom: 6px;">
             SYSTEM ARCHITECTURE
         </div>
-        <div style="font-size: 1.1rem; font-weight: 600; color: #F2F2F0; margin-bottom: 8px;">
+        <div style="font-size: 1.1rem; font-weight: 600; color: #F2F2F4; margin-bottom: 8px;">
             Digital Image Processing & Pattern Analysis
         </div>
-        <p style="font-size: 0.88rem; color: #A7A8A5; line-height: 1.6; margin-bottom: 10px;">
+        <p style="font-size: 0.88rem; color: #B4B5BC; line-height: 1.6; margin-bottom: 10px;">
             TreadVision extracts 25 deterministic spatial, texture, and shape descriptors directly from 
             calibrated pixel data before classification. All intermediate representations—including bilateral smoothing, 
             CLAHE contrast grids, Otsu component masks, and Canny boundary fields—remain fully inspectable for academic 
             and forensic verification.
         </p>
-        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.76rem; color: #F2F2F0; background: #1E2024; padding: 8px 12px; border-radius: 3px; border: 1px solid #34373B;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.76rem; color: #F2F2F4; background: #282A34; padding: 8px 12px; border-radius: 3px; border: 1px solid #41434E;">
             PIPELINE: Input &rarr; Preprocessing &rarr; CLAHE &rarr; Segmentation &rarr; Edge Density &rarr; GLCM &rarr; Hu Moments &rarr; Classification
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # Three Primary Workflows
+    # Three Primary Workflows - Exactly Equal Proportions and Aligned Baselines
     col1, col2, col3 = st.columns(3, gap="medium")
 
     with col1:
@@ -55,8 +55,7 @@ def render_home():
             <div class="tv-card-header">SECTION 01</div>
             <div class="tv-card-title">TREAD ANALYZER</div>
             <div class="tv-card-desc">
-                Assess tyre tread condition using image processing, feature analysis and machine learning.
-                Measures groove integrity, edge definition, and surface homogeneity.
+                Assess tyre tread condition using image processing, feature extraction and machine learning. Measures groove integrity, edge definition, and surface relief.
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -71,8 +70,7 @@ def render_home():
             <div class="tv-card-header">SECTION 02</div>
             <div class="tv-card-title">TYRE REPLACEMENT</div>
             <div class="tv-card-desc">
-                Evaluate tyre condition and explore replacement options.
-                Benchmarked against reference depth safety thresholds and database sizes.
+                Evaluate tyre condition and explore compatible replacement options. Benchmarked against reference safety depth thresholds and database specifications.
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -87,8 +85,7 @@ def render_home():
             <div class="tv-card-header">SECTION 03</div>
             <div class="tv-card-title">TREAD DATABASE</div>
             <div class="tv-card-desc">
-                Explore tread patterns, specifications and vehicle applications.
-                Search manufacturer catalogs, available rim diameters, and verified fitments.
+                Explore tread patterns, specifications and verified vehicle applications. Search manufacturer catalogs, available rim diameters, and reference fitments.
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -99,14 +96,14 @@ def render_home():
     # Dedicated Forensic Workflow Section
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("""
-    <div style="background: #17191C; border: 1px solid #34373B; border-left: 4px solid #A51F32; border-radius: 4px; padding: 22px 24px;">
-        <div style="font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: #A51F32; font-weight: 700; margin-bottom: 4px;">
+    <div style="background: #23252E; border: 1px solid #41434E; border-left: 4px solid #D8125B; border-radius: 4px; padding: 22px 24px;">
+        <div style="font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: #D8125B; font-weight: 700; margin-bottom: 4px;">
             INVESTIGATIVE WORKFLOW
         </div>
-        <div style="font-size: 1.25rem; font-weight: 700; color: #F2F2F0; margin-bottom: 8px;">
+        <div style="font-size: 1.25rem; font-weight: 700; color: #F2F2F4; margin-bottom: 8px;">
             FORENSIC TREAD MATCHING
         </div>
-        <div style="font-size: 0.9rem; color: #A7A8A5; line-height: 1.6; margin-bottom: 16px;">
+        <div style="font-size: 0.9rem; color: #B4B5BC; line-height: 1.6; margin-bottom: 16px;">
             Compare photographed tread impressions against reference tread patterns and associated vehicle applications.
             Evaluates impressions recovered from mud, soil, sand, and asphalt using weighted multi-criteria similarity
             (edge alignment, GLCM texture, contour moments, and invariant ORB keypoints) to retrieve candidate tyre models

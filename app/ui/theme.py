@@ -1,17 +1,17 @@
 """
 TreadVision: Automotive Engineering & Scientific Dark UI Theme
 Color Palette:
-  Main Background:    #0F1012
-  Primary Surface:    #17191C
-  Secondary Surface:  #1E2024
-  Elevated Surface:   #24272B
-  Primary Text:       #F2F2F0
-  Secondary Text:     #A7A8A5
-  Muted Text:         #777A78
-  Borders:            #34373B
-  Accent:             #A51F32
-  Accent Hover:       #C12A3E
-  Technical Canvas:   #0B0C0E
+  Main Background:            #2C2E39
+  Primary Surface:            #23252E
+  Secondary Surface:          #282A34
+  Elevated / Popover Surface: #30323D
+  Primary Text:               #F2F2F4
+  Secondary Text:             #B4B5BC
+  Muted Text:                 #858792
+  Borders:                    #41434E
+  Accent / Trim:              #D8125B
+  Accent Hover:               #EF246D
+  Technical Canvas:           #1B1D25
 """
 import streamlit as st
 
@@ -23,17 +23,17 @@ def apply_theme():
     @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap');
 
     :root {
-        --bg-main: #0F1012;
-        --surface-primary: #17191C;
-        --surface-secondary: #1E2024;
-        --surface-elevated: #24272B;
-        --text-primary: #F2F2F0;
-        --text-secondary: #A7A8A5;
-        --text-muted: #777A78;
-        --border-color: #34373B;
-        --accent-red: #A51F32;
-        --accent-hover: #C12A3E;
-        --canvas-technical: #0B0C0E;
+        --bg-main: #2C2E39;
+        --surface-primary: #23252E;
+        --surface-secondary: #282A34;
+        --surface-elevated: #30323D;
+        --text-primary: #F2F2F4;
+        --text-secondary: #B4B5BC;
+        --text-muted: #858792;
+        --border-color: #41434E;
+        --accent: #D8125B;
+        --accent-hover: #EF246D;
+        --canvas-technical: #1B1D25;
     }
 
     /* Base Body & App Container */
@@ -101,17 +101,23 @@ def apply_theme():
         padding-right: 1.25rem !important;
     }
 
-    /* Technical Cards */
+    /* Equal Proportion Technical Cards */
     .tv-card {
         background-color: var(--surface-primary);
         border: 1px solid var(--border-color);
         border-radius: 4px;
         padding: 22px;
-        margin-bottom: 16px;
+        height: 220px;
+        min-height: 220px;
+        max-height: 220px;
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+        margin-bottom: 12px;
     }
 
     .tv-card-header {
-        font-size: 0.76rem;
+        font-size: 0.74rem;
         font-weight: 700;
         letter-spacing: 0.08em;
         text-transform: uppercase;
@@ -124,13 +130,17 @@ def apply_theme():
         font-weight: 600;
         color: var(--text-primary);
         margin-bottom: 8px;
+        min-height: 28px;
     }
 
     .tv-card-desc {
-        font-size: 0.88rem;
+        font-size: 0.86rem;
         color: var(--text-secondary);
         line-height: 1.55;
-        margin-bottom: 16px;
+        height: 72px;
+        min-height: 72px;
+        max-height: 72px;
+        overflow: hidden;
     }
 
     /* Technical Numbered Steps */
@@ -138,7 +148,7 @@ def apply_theme():
         font-family: 'IBM Plex Mono', monospace;
         font-size: 0.95rem;
         font-weight: 600;
-        color: var(--accent-red);
+        color: var(--accent);
         letter-spacing: 0.05em;
         margin-bottom: 4px;
     }
@@ -159,15 +169,15 @@ def apply_theme():
     }
 
     .tv-tag-accent {
-        border-color: var(--accent-red);
+        border-color: var(--accent);
         color: #FFFFFF;
-        background: var(--accent-red);
+        background: var(--accent);
     }
 
     /* Scientific / Forensic Disclaimer Notice */
     .tv-notice {
         background-color: var(--surface-secondary);
-        border-left: 3px solid var(--accent-red);
+        border-left: 3px solid var(--accent);
         border-top: 1px solid var(--border-color);
         border-right: 1px solid var(--border-color);
         border-bottom: 1px solid var(--border-color);
@@ -261,9 +271,9 @@ def apply_theme():
 
     /* 4. Buttons */
     button[kind="primary"], .stButton > button[kind="primary"] {
-        background-color: var(--accent-red) !important;
+        background-color: var(--accent) !important;
         color: #FFFFFF !important;
-        border: 1px solid var(--accent-red) !important;
+        border: 1px solid var(--accent) !important;
         border-radius: 4px !important;
         font-family: 'IBM Plex Sans', sans-serif !important;
         font-size: 0.82rem !important;
@@ -295,7 +305,7 @@ def apply_theme():
 
     button[kind="secondary"]:hover, .stButton > button:hover {
         background-color: var(--surface-secondary) !important;
-        border-color: #4A4E53 !important;
+        border-color: #555866 !important;
     }
 
     /* 5. File Uploader */
@@ -307,7 +317,7 @@ def apply_theme():
     }
 
     div[data-testid="stFileUploader"]:hover {
-        border-color: var(--accent-red) !important;
+        border-color: var(--accent) !important;
     }
 
     div[data-testid="stFileUploader"] section {
@@ -343,7 +353,7 @@ def apply_theme():
 
     button[data-baseweb="tab"][aria-selected="true"] {
         color: var(--text-primary) !important;
-        border-bottom: 2px solid var(--accent-red) !important;
+        border-bottom: 2px solid var(--accent) !important;
     }
 
     /* 8. DataFrames & Tables */
@@ -391,12 +401,12 @@ def apply_theme():
 
     /* Sliders */
     div[data-testid="stSlider"] div[role="slider"] {
-        background-color: var(--accent-red) !important;
+        background-color: var(--accent) !important;
     }
 
     /* Progress Bar */
     div[data-testid="stProgressBar"] > div > div {
-        background-color: var(--accent-red) !important;
+        background-color: var(--accent) !important;
     }
 
     /* Technical Canvas Image Containers */

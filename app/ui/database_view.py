@@ -21,14 +21,14 @@ def render_database():
     f_c1, f_c2 = st.columns([3, 1], gap="medium")
     with f_c1:
         st.markdown("""
-        <div style="background: #17191C; border: 1px solid #34373B; border-left: 3px solid #A51F32; border-radius: 4px; padding: 14px 18px;">
-            <div style="font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: #A51F32; font-weight: 700; margin-bottom: 2px;">
+        <div style="background: #23252E; border: 1px solid #41434E; border-left: 3px solid #D8125B; border-radius: 4px; padding: 14px 18px;">
+            <div style="font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: #D8125B; font-weight: 700; margin-bottom: 2px;">
                 FORENSIC CAPABILITY
             </div>
-            <div style="font-size: 0.95rem; font-weight: 600; color: #F2F2F0; margin-bottom: 2px;">
+            <div style="font-size: 0.95rem; font-weight: 600; color: #F2F2F4; margin-bottom: 2px;">
                 Forensic Tread Impression Matcher
             </div>
-            <div style="font-size: 0.84rem; color: #A7A8A5;">
+            <div style="font-size: 0.84rem; color: #B4B5BC;">
                 Query an unknown crime-scene tyre impression against reference patterns to retrieve candidate tyre models and vehicle applications.
             </div>
         </div>
@@ -49,7 +49,7 @@ def render_database():
         with tab_catalog:
             # Search & Multi-Filters
             st.markdown("""
-            <div style="font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: #F2F2F0; font-weight: 700; margin-bottom: 6px;">
+            <div style="font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: #F2F2F4; font-weight: 700; margin-bottom: 6px;">
                 SEARCH REFERENCE CATALOGUE
             </div>
             """, unsafe_allow_html=True)
@@ -77,7 +77,7 @@ def render_database():
 
             tyres = query.all()
 
-            st.markdown(f"<div style='font-size: 0.78rem; color: #A7A8A5; margin-top: 8px; margin-bottom: 16px;'>INDEXED RECORDS: <span class='tv-mono' style='color:#F2F2F0; font-weight:600;'>{len(tyres)}</span> TYRE MODELS</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='font-size: 0.78rem; color: #B4B5BC; margin-top: 8px; margin-bottom: 16px;'>INDEXED RECORDS: <span class='tv-mono' style='color:#F2F2F4; font-weight:600;'>{len(tyres)}</span> TYRE MODELS</div>", unsafe_allow_html=True)
 
             if view_mode == "Catalogue Table":
                 # Structured Catalogue List
@@ -100,7 +100,7 @@ def render_database():
                 st.dataframe(df_cat, use_container_width=True, hide_index=True)
 
             # Technical Specification Cards / Expanded View
-            st.markdown("<div style='margin-top: 20px; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #F2F2F0; margin-bottom: 10px;'>TECHNICAL SPECIFICATIONS & PROFILES</div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-top: 20px; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #F2F2F4; margin-bottom: 10px;'>TECHNICAL SPECIFICATIONS & PROFILES</div>", unsafe_allow_html=True)
 
             for t in tyres:
                 with st.expander(f"{t.manufacturer.upper()} — {t.model} ({t.category})", expanded=False):
@@ -110,15 +110,15 @@ def render_database():
                         if t.tread_pattern and Path(t.tread_pattern.image_path).exists():
                             st.image(t.tread_pattern.image_path, caption=f"Pattern: {t.pattern_name}", use_container_width=True)
                         else:
-                            st.markdown("<div style='background:#1E2024; height:200px; display:flex; align-items:center; justify-content:center; color:#A7A8A5; font-size:0.8rem; border:1px solid #34373B;'>Reference image unavailable</div>", unsafe_allow_html=True)
+                            st.markdown("<div style='background:#282A34; height:200px; display:flex; align-items:center; justify-content:center; color:#B4B5BC; font-size:0.8rem; border:1px solid #41434E;'>Reference image unavailable</div>", unsafe_allow_html=True)
 
                     with spec_col_details:
                         st.markdown(f"""
-                        <div style="font-size: 0.74rem; letter-spacing: 0.1em; text-transform: uppercase; color: #A51F32; font-weight: 700;">
+                        <div style="font-size: 0.74rem; letter-spacing: 0.1em; text-transform: uppercase; color: #D8125B; font-weight: 700;">
                             {t.category.upper()} &nbsp;|&nbsp; {t.construction.upper()}
                         </div>
-                        <h2 style="margin: 2px 0 10px 0; color: #F2F2F0;">{t.manufacturer} {t.model}</h2>
-                        <div style="font-size: 0.88rem; color: #A7A8A5; margin-bottom: 14px; line-height: 1.5;">
+                        <h2 style="margin: 2px 0 10px 0; color: #F2F2F4;">{t.manufacturer} {t.model}</h2>
+                        <div style="font-size: 0.88rem; color: #B4B5BC; margin-bottom: 14px; line-height: 1.5;">
                             {t.description}
                         </div>
                         """, unsafe_allow_html=True)
@@ -129,11 +129,11 @@ def render_database():
                         symmetry = t.tread_pattern.symmetry if t.tread_pattern else "Asymmetric"
 
                         st.markdown(f"""
-                        <div style="background: #17191C; border: 1px solid #34373B; border-radius: 4px; padding: 14px; margin-bottom: 12px;">
-                            <div style="font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: #A7A8A5; font-weight: 600; margin-bottom: 6px;">
+                        <div style="background: #23252E; border: 1px solid #41434E; border-radius: 4px; padding: 14px; margin-bottom: 12px;">
+                            <div style="font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: #B4B5BC; font-weight: 600; margin-bottom: 6px;">
                                 SPECIFICATIONS
                             </div>
-                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 0.82rem; color: #F2F2F0;">
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 0.82rem; color: #F2F2F4;">
                                 <div><strong>Pattern:</strong> {t.pattern_name}</div>
                                 <div><strong>Geometry:</strong> {p_type}</div>
                                 <div><strong>Symmetry:</strong> {symmetry}</div>
@@ -156,8 +156,11 @@ def render_database():
         # TAB 2: Vehicle Fitments Index
         with tab_vehicles:
             st.markdown("""
-            <div style="font-size: 0.76rem; letter-spacing: 0.08em; text-transform: uppercase; color: #F2F2F0; font-weight: 700; margin-bottom: 8px;">
+            <div style="font-size: 0.76rem; letter-spacing: 0.08em; text-transform: uppercase; color: #F2F2F4; font-weight: 700; margin-bottom: 8px;">
                 VEHICLE FITMENT INDEX
+            </div>
+            <div style="font-size: 0.82rem; color: #B4B5BC; margin-bottom: 12px;">
+                Reference specifications from catalog seed data representing potential applications.
             </div>
             """, unsafe_allow_html=True)
 
@@ -179,15 +182,15 @@ def render_database():
                         df_fits = pd.DataFrame(fit_rows)
                         st.dataframe(df_fits, use_container_width=True, hide_index=True)
                     else:
-                        st.markdown("<div style='font-size:0.82rem; color:#A7A8A5;'>No direct tyre fitments mapped in current database slice.</div>", unsafe_allow_html=True)
+                        st.markdown("<div style='font-size:0.82rem; color:#B4B5BC;'>No direct tyre fitments mapped in current database slice.</div>", unsafe_allow_html=True)
 
         # TAB 3: CSV Batch Importer
         with tab_import:
             st.markdown("""
-            <div style="font-size: 0.76rem; letter-spacing: 0.08em; text-transform: uppercase; color: #F2F2F0; font-weight: 700; margin-bottom: 8px;">
+            <div style="font-size: 0.76rem; letter-spacing: 0.08em; text-transform: uppercase; color: #F2F2F4; font-weight: 700; margin-bottom: 8px;">
                 IMPORT TYRE RECORDS (CSV)
             </div>
-            <div style="font-size: 0.85rem; color: #A7A8A5; margin-bottom: 12px; line-height: 1.5;">
+            <div style="font-size: 0.85rem; color: #B4B5BC; margin-bottom: 12px; line-height: 1.5;">
                 Extend the database with verified tyre catalogs. The CSV must contain standard schema columns:<br>
                 <code class="tv-mono">manufacturer, model, pattern_name, category, construction, description, image_path, pattern_type, sizes</code>
             </div>

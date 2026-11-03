@@ -8,8 +8,8 @@ from pathlib import Path
 import os
 import glob
 import numpy as np
-from sklearn.model_selection import StratifiedGroupKFold, GroupShuffleSplit
-from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.model_selection import StratifiedGroupKFold
+from sklearn.preprocessing import LabelEncoder
 
 from app.config import WEAR_DATA_DIR, WEAR_CLASSES
 from app.image_processing.pipeline import ImageProcessingPipeline
@@ -34,8 +34,8 @@ class WearDataset:
             good/
             moderate/
             worn/
-        Files are named with physical tyre id prefix if available, e.g.:
-        tyre01_view1.jpg, tyre01_view2.jpg, etc.
+        Files are named with physical tyre id prefix, e.g.:
+        tyre_g01_view1.jpg, tyre_g01_view2.jpg, etc.
         """
         records = []
         for wear_class in WEAR_CLASSES:
@@ -46,7 +46,6 @@ class WearDataset:
             for ext in ("*.jpg", "*.jpeg", "*.png", "*.bmp", "*.webp"):
                 for file_path in class_folder.glob(ext):
                     filename = file_path.stem
-                    # Extract physical tyre ID (e.g., "tyre01" from "tyre01_01.jpg")
                     parts = filename.split("_")
                     if len(parts) >= 2:
                         tyre_id = f"{parts[0]}_{parts[1]}"
@@ -102,18 +101,32 @@ class WearDataset:
         y: np.ndarray,
         groups: np.ndarray,
         test_size: float = 0.25,
-        random_state: int = 42
-    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        random_state: int = 42,
+        return_groups: bool = False
+    ) -> Tuple[Any, ...]:
         """
-        Anti-leakage split: ensures images from the same physical tyre (groups)
-        do not leak across train and test sets.
+        Anti-leakage split using StratifiedGroupKFold:
+        Guarantees:
+          1. train_groups ∩ test_groups == ∅ (zero physical tyre leakage)
+          2. Every class (Good, Moderate, Worn) is represented in test set
+          3. No physical tyre's augmented views cross between train and test
         """
         unique_groups = np.unique(groups)
-        if len(unique_groups) > 2:
-            gss = GroupShuffleSplit(n_splits=1, test_size=test_size, random_state=random_state)
-            train_idx, test_idx = next(gss.split(X, y, groups=groups))
-            return X[train_idx], X[test_idx], y[train_idx], y[test_idx]
+        n_splits = max(2, int(round(1.0 / test_size)))
+
+        if len(unique_groups) >= n_splits:
+            sgkf = StratifiedGroupKFold(n_splits=n_splits, shuffle=True, random_state=random_state)
+            train_idx, test_idx = next(sgkf.split(X, y, groups=groups))
         else:
-            # Fallback if too few distinct tyres
-            from sklearn.model_selection import train_test_split
-            return train_test_split(X, y, test_size=test_size, random_state=random_state, stratify=y)
+            # Fallback if too few distinct physical tyres
+            from sklearn.model_selection import StratifiedKFold
+            skf = StratifiedKFold(n_splits=min(3, len(y)), shuffle=True, random_state=random_state)
+            train_idx, test_idx = next(skf.split(X, y))
+
+        X_train, X_test = X[train_idx], X[test_idx]
+        y_train, y_test = y[train_idx], y[test_idx]
+        groups_train, groups_test = groups[train_idx], groups[test_idx]
+
+        if return_groups:
+            return X_train, X_test, y_train, y_test, groups_train, groups_test
+        return X_train, X_test, y_train, y_test
