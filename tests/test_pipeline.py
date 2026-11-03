@@ -115,12 +115,14 @@ def test_feature_fusion(sample_test_image):
     edges = detect_canny_edges(enhanced)
     _, binary = otsu_threshold(enhanced)
 
-    comp_dict, vec = FeatureFusion.extract_all(enhanced, edges, binary)
-    assert len(vec) == 25
-    assert len(FEATURE_NAMES) == 25
+    comp_dict, vec = FeatureFusion.extract_all(enhanced, edges, binary, raw_image=sample_test_image)
+    assert len(vec) == 31
+    assert len(FEATURE_NAMES) == 31
     assert "edge" in comp_dict
     assert "texture" in comp_dict
     assert "shape" in comp_dict
+    assert "wear" in comp_dict
+    assert len(comp_dict["wear"]) == 6
 
 
 def test_full_pipeline(sample_test_image):
@@ -133,5 +135,61 @@ def test_full_pipeline(sample_test_image):
     assert "Enhanced (CLAHE)" in res.stages
     assert "Canny Edges" in res.stages
     assert res.feature_vector is not None
-    assert len(res.feature_vector) == 25
+    assert len(res.feature_vector) == 31
     assert res.metrics["pattern_integrity_pct"] > 0.0
+
+
+def test_adaptive_canny_bounds():
+    """Verify adaptive Canny threshold computation satisfies specified bounds [15, 120] and [40, 220]."""
+    from app.image_processing.edges import compute_adaptive_canny_thresholds
+    # Dark uniform image
+    dark_img = np.zeros((100, 100), dtype=np.uint8)
+    low_d, high_d = compute_adaptive_canny_thresholds(dark_img)
+    assert 15 <= low_d <= 120
+    assert 40 <= high_d <= 220
+
+    # High contrast checkerboard
+    checker = np.indices((100, 100)).sum(axis=0) % 2 * 255
+    checker = checker.astype(np.uint8)
+    low_c, high_c = compute_adaptive_canny_thresholds(checker)
+    assert 15 <= low_c <= 120
+    assert 40 <= high_c <= 220
+
+
+def test_wear_specific_features_standalone(sample_test_image):
+    """Verify all 6 wear-specific features return bounded, non-NaN values."""
+    from app.image_processing.wear_features import extract_wear_specific_features, WEAR_FEATURE_NAMES
+    res = extract_wear_specific_features(sample_test_image)
+    assert len(res) == 6
+    for k in WEAR_FEATURE_NAMES:
+        assert k in res
+        assert not np.isnan(res[k])
+        assert not np.isinf(res[k])
+
+
+def test_training_inference_feature_parity(tmp_path):
+    """Verify exact bit-for-bit parity of 31-D feature vectors between training and inference pipelines."""
+    # Create test tyre view
+    img = np.full((256, 256, 3), 40, dtype=np.uint8)
+    cv2.line(img, (64, 0), (64, 256), (200, 200, 200), 8)
+    cv2.line(img, (128, 0), (128, 256), (200, 200, 200), 8)
+    cv2.line(img, (192, 0), (192, 256), (200, 200, 200), 8)
+    test_img_path = tmp_path / "tyre_test01_view1.jpg"
+    cv2.imwrite(str(test_img_path), img)
+
+    # 1. Feature extraction through standard pipeline (inference path)
+    infer_pipeline = ImageProcessingPipeline(target_size=(512, 512))
+    infer_res = infer_pipeline.process(str(test_img_path))
+    assert infer_res.success is True
+    infer_vec = infer_res.feature_vector
+
+    # 2. Feature extraction through WearDataset (training path)
+    from app.ml.dataset import WearDataset
+    dataset_mgr = WearDataset(data_dir=tmp_path)
+    records = [{"file_path": str(test_img_path), "label": "good", "tyre_id": "tyre_test01"}]
+    X, y, groups, paths = dataset_mgr.build_feature_matrix(records)
+    train_vec = X[0]
+
+    assert len(infer_vec) == 31
+    assert len(train_vec) == 31
+    np.testing.assert_allclose(infer_vec, train_vec, rtol=1e-5, atol=1e-5)

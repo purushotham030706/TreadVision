@@ -3,9 +3,12 @@ TreadVision: Synthetic Asset and Demo Dataset Generator
 Generates realistic computer vision reference patterns, forensic crime scene impressions,
 and calibrated physical-tyre-grouped wear datasets.
 """
+import sys
 from pathlib import Path
 import cv2
 import numpy as np
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.config import (
     REFERENCE_PATTERNS_DIR,
@@ -28,29 +31,35 @@ def render_primacy4_pattern(wear_level: float = 0.0) -> np.ndarray:
     4 longitudinal grooves, lateral curved sipes, outside shoulder blocks.
     wear_level: 0.0 (fresh/new) to 1.0 (completely bald/worn).
     """
-    img = create_base_tread_canvas(512, 512, bg_intensity=int(135 - wear_level * 10))
-    groove_depth = int(25 + wear_level * 75)
+    bg_intensity = int(138 - wear_level * 10)
+    img = create_base_tread_canvas(512, 512, bg_intensity=bg_intensity)
+    groove_depth = int(20 + wear_level * 36)
     groove_positions = [110, 200, 310, 410]
-    groove_width = max(3, int(18 * (1.0 - wear_level * 0.4)))
+    groove_width = max(8, int(18 * (1.0 - wear_level * 0.40)))
 
     for x in groove_positions:
         cv2.line(img, (x, 0), (x, 512), color=groove_depth, thickness=groove_width)
 
-    # Lateral angled sipes on outer ribs (worn away at high wear)
-    if wear_level < 0.72:
-        sipe_depth = int(35 + wear_level * 75)
+    # Lateral angled sipes on outer ribs (continuously degraded with wear)
+    sipe_alpha = max(0.0, float(1.0 - (wear_level / 0.78)**1.3))
+    if sipe_alpha > 0.01:
+        sipe_canvas = img.copy()
+        sipe_depth = int(28 + wear_level * 45)
         sipe_spacing = 32
-        sipe_thickness = max(1, int(3 * (1.0 - wear_level * 0.6)))
+        thick = 2 if wear_level < 0.28 else 1
+        rib_factors = [0.85, 1.10, 1.25, 1.10, 0.85]
         for y in range(0, 512, sipe_spacing):
-            cv2.line(img, (10, y), (100, y + 15), color=sipe_depth, thickness=sipe_thickness)
-            cv2.line(img, (120, y + 10), (190, y + 25), color=sipe_depth, thickness=sipe_thickness)
-            cv2.line(img, (210, y + 5), (300, y + 20), color=sipe_depth, thickness=sipe_thickness)
-            cv2.line(img, (320, y + 15), (400, y + 5), color=sipe_depth, thickness=sipe_thickness)
-            cv2.line(img, (420, y + 10), (500, y + 25), color=sipe_depth, thickness=sipe_thickness)
+            cv2.line(sipe_canvas, (10, y), (100, y + 15), color=int(sipe_depth + (1.0 - rib_factors[0]) * 15), thickness=thick, lineType=cv2.LINE_AA)
+            cv2.line(sipe_canvas, (120, y + 10), (190, y + 25), color=int(sipe_depth + (1.0 - rib_factors[1]) * 15), thickness=thick, lineType=cv2.LINE_AA)
+            cv2.line(sipe_canvas, (210, y + 5), (300, y + 20), color=int(sipe_depth + (1.0 - rib_factors[2]) * 15), thickness=thick, lineType=cv2.LINE_AA)
+            cv2.line(sipe_canvas, (320, y + 15), (400, y + 5), color=int(sipe_depth + (1.0 - rib_factors[3]) * 15), thickness=thick, lineType=cv2.LINE_AA)
+            cv2.line(sipe_canvas, (420, y + 10), (500, y + 25), color=int(sipe_depth + (1.0 - rib_factors[4]) * 15), thickness=thick, lineType=cv2.LINE_AA)
+        img = cv2.addWeighted(sipe_canvas, sipe_alpha, img, 1.0 - sipe_alpha, 0)
 
-    noise = np.random.normal(0, 4, img.shape).astype(np.int16)
-    img = np.clip(img.astype(np.int16) + noise, 0, 255).astype(np.uint8)
-    img = cv2.GaussianBlur(img, (3, 3), 0.5)
+    noise_sigma = max(1.8, 4.5 * (1.0 - wear_level * 0.60))
+    noise = np.random.normal(0, noise_sigma, img.shape).astype(np.float32)
+    img = np.clip(img.astype(np.float32) + noise, 0, 255).astype(np.uint8)
+    img = cv2.GaussianBlur(img, (3, 3), 0.35)
     return cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
 
@@ -59,28 +68,33 @@ def render_premiumcontact6_pattern(wear_level: float = 0.0) -> np.ndarray:
     Renders Continental PremiumContact 6 style asymmetric tread:
     3 wide longitudinal channels, macro-block shoulder, asymmetric chevron ribs.
     """
-    img = create_base_tread_canvas(512, 512, bg_intensity=int(135 - wear_level * 10))
-    groove_depth = int(25 + wear_level * 75)
+    bg_intensity = int(138 - wear_level * 10)
+    img = create_base_tread_canvas(512, 512, bg_intensity=bg_intensity)
+    groove_depth = int(20 + wear_level * 36)
     groove_positions = [140, 260, 380]
-    groove_width = max(4, int(24 * (1.0 - wear_level * 0.4)))
+    groove_width = max(10, int(24 * (1.0 - wear_level * 0.40)))
 
     for x in groove_positions:
         cv2.line(img, (x, 0), (x, 512), color=groove_depth, thickness=groove_width)
 
-    if wear_level < 0.72:
-        sipe_depth = int(35 + wear_level * 75)
+    sipe_alpha = max(0.0, float(1.0 - (wear_level / 0.78)**1.3))
+    if sipe_alpha > 0.01:
+        sipe_canvas = img.copy()
+        sipe_depth = int(28 + wear_level * 45)
         sipe_spacing = 40
-        sipe_thickness = max(1, int(4 * (1.0 - wear_level * 0.6)))
+        thick = 2 if wear_level < 0.28 else 1
         for y in range(0, 512, sipe_spacing):
-            cv2.line(img, (10, y), (130, y + 20), color=sipe_depth, thickness=sipe_thickness)
+            cv2.line(sipe_canvas, (10, y), (130, y + 20), color=sipe_depth, thickness=thick, lineType=cv2.LINE_AA)
             pts = np.array([[155, y + 10], [200, y + 25], [245, y + 10]], np.int32)
-            cv2.polylines(img, [pts], isClosed=False, color=sipe_depth, thickness=sipe_thickness)
-            cv2.line(img, (275, y + 20), (365, y + 5), color=sipe_depth, thickness=sipe_thickness)
-            cv2.line(img, (395, y + 5), (500, y + 30), color=sipe_depth, thickness=sipe_thickness)
+            cv2.polylines(sipe_canvas, [pts], isClosed=False, color=sipe_depth, thickness=thick, lineType=cv2.LINE_AA)
+            cv2.line(sipe_canvas, (275, y + 20), (365, y + 5), color=sipe_depth, thickness=thick, lineType=cv2.LINE_AA)
+            cv2.line(sipe_canvas, (395, y + 5), (500, y + 30), color=sipe_depth, thickness=thick, lineType=cv2.LINE_AA)
+        img = cv2.addWeighted(sipe_canvas, sipe_alpha, img, 1.0 - sipe_alpha, 0)
 
-    noise = np.random.normal(0, 4, img.shape).astype(np.int16)
-    img = np.clip(img.astype(np.int16) + noise, 0, 255).astype(np.uint8)
-    img = cv2.GaussianBlur(img, (3, 3), 0.5)
+    noise_sigma = max(1.8, 4.5 * (1.0 - wear_level * 0.60))
+    noise = np.random.normal(0, noise_sigma, img.shape).astype(np.float32)
+    img = np.clip(img.astype(np.float32) + noise, 0, 255).astype(np.uint8)
+    img = cv2.GaussianBlur(img, (3, 3), 0.35)
     return cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
 
@@ -89,27 +103,32 @@ def render_turanza_pattern(wear_level: float = 0.0) -> np.ndarray:
     Renders Bridgestone Turanza T005 style tread:
     4 ribs, high-angle shoulder siping, continuous center rib.
     """
-    img = create_base_tread_canvas(512, 512, bg_intensity=int(135 - wear_level * 10))
-    groove_depth = int(25 + wear_level * 75)
+    bg_intensity = int(138 - wear_level * 10)
+    img = create_base_tread_canvas(512, 512, bg_intensity=bg_intensity)
+    groove_depth = int(20 + wear_level * 36)
     groove_positions = [120, 215, 305, 400]
-    groove_width = max(3, int(16 * (1.0 - wear_level * 0.4)))
+    groove_width = max(8, int(16 * (1.0 - wear_level * 0.40)))
 
     for x in groove_positions:
         cv2.line(img, (x, 0), (x, 512), color=groove_depth, thickness=groove_width)
 
-    if wear_level < 0.72:
-        sipe_depth = int(35 + wear_level * 75)
+    sipe_alpha = max(0.0, float(1.0 - (wear_level / 0.78)**1.3))
+    if sipe_alpha > 0.01:
+        sipe_canvas = img.copy()
+        sipe_depth = int(28 + wear_level * 45)
         sipe_spacing = 28
-        sipe_thickness = max(1, int(3 * (1.0 - wear_level * 0.6)))
+        thick = 2 if wear_level < 0.28 else 1
         for y in range(0, 512, sipe_spacing):
-            cv2.line(img, (15, y), (110, y + 30), color=sipe_depth, thickness=sipe_thickness)
-            cv2.line(img, (130, y + 15), (205, y), color=sipe_depth, thickness=sipe_thickness)
-            cv2.line(img, (315, y), (390, y + 20), color=sipe_depth, thickness=sipe_thickness)
-            cv2.line(img, (410, y + 25), (495, y), color=sipe_depth, thickness=sipe_thickness)
+            cv2.line(sipe_canvas, (15, y), (110, y + 30), color=sipe_depth, thickness=thick, lineType=cv2.LINE_AA)
+            cv2.line(sipe_canvas, (130, y + 15), (205, y), color=sipe_depth, thickness=thick, lineType=cv2.LINE_AA)
+            cv2.line(sipe_canvas, (315, y), (390, y + 20), color=sipe_depth, thickness=thick, lineType=cv2.LINE_AA)
+            cv2.line(sipe_canvas, (410, y + 25), (495, y), color=sipe_depth, thickness=thick, lineType=cv2.LINE_AA)
+        img = cv2.addWeighted(sipe_canvas, sipe_alpha, img, 1.0 - sipe_alpha, 0)
 
-    noise = np.random.normal(0, 4, img.shape).astype(np.int16)
-    img = np.clip(img.astype(np.int16) + noise, 0, 255).astype(np.uint8)
-    img = cv2.GaussianBlur(img, (3, 3), 0.5)
+    noise_sigma = max(1.8, 4.5 * (1.0 - wear_level * 0.60))
+    noise = np.random.normal(0, noise_sigma, img.shape).astype(np.float32)
+    img = np.clip(img.astype(np.float32) + noise, 0, 255).astype(np.uint8)
+    img = cv2.GaussianBlur(img, (3, 3), 0.35)
     return cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
 
@@ -118,27 +137,32 @@ def render_efficientgrip_pattern(wear_level: float = 0.0) -> np.ndarray:
     Renders Goodyear EfficientGrip Performance 2 style tread:
     Curved lateral hydro-channels and 4 circumferential ribs.
     """
-    img = create_base_tread_canvas(512, 512, bg_intensity=int(135 - wear_level * 10))
-    groove_depth = int(25 + wear_level * 75)
+    bg_intensity = int(138 - wear_level * 10)
+    img = create_base_tread_canvas(512, 512, bg_intensity=bg_intensity)
+    groove_depth = int(20 + wear_level * 36)
     groove_positions = [105, 205, 315, 415]
-    groove_width = max(3, int(17 * (1.0 - wear_level * 0.4)))
+    groove_width = max(8, int(17 * (1.0 - wear_level * 0.40)))
 
     for x in groove_positions:
         cv2.line(img, (x, 0), (x, 512), color=groove_depth, thickness=groove_width)
 
-    if wear_level < 0.72:
-        sipe_depth = int(35 + wear_level * 75)
+    sipe_alpha = max(0.0, float(1.0 - (wear_level / 0.78)**1.3))
+    if sipe_alpha > 0.01:
+        sipe_canvas = img.copy()
+        sipe_depth = int(28 + wear_level * 45)
         sipe_spacing = 34
-        sipe_thickness = max(1, int(3 * (1.0 - wear_level * 0.6)))
+        thick = 2 if wear_level < 0.28 else 1
         for y in range(0, 512, sipe_spacing):
-            cv2.ellipse(img, (50, y), (50, 20), 0, 0, 90, sipe_depth, sipe_thickness)
-            cv2.ellipse(img, (460, y), (50, 20), 0, 90, 180, sipe_depth, sipe_thickness)
-            cv2.line(img, (120, y + 10), (195, y + 25), color=sipe_depth, thickness=sipe_thickness)
-            cv2.line(img, (220, y + 20), (305, y + 5), color=sipe_depth, thickness=sipe_thickness)
+            cv2.ellipse(sipe_canvas, (50, y), (50, 20), 0, 0, 90, sipe_depth, thick, lineType=cv2.LINE_AA)
+            cv2.ellipse(sipe_canvas, (460, y), (50, 20), 0, 90, 180, sipe_depth, thick, lineType=cv2.LINE_AA)
+            cv2.line(sipe_canvas, (120, y + 10), (195, y + 25), color=sipe_depth, thickness=thick, lineType=cv2.LINE_AA)
+            cv2.line(sipe_canvas, (220, y + 20), (305, y + 5), color=sipe_depth, thickness=thick, lineType=cv2.LINE_AA)
+        img = cv2.addWeighted(sipe_canvas, sipe_alpha, img, 1.0 - sipe_alpha, 0)
 
-    noise = np.random.normal(0, 4, img.shape).astype(np.int16)
-    img = np.clip(img.astype(np.int16) + noise, 0, 255).astype(np.uint8)
-    img = cv2.GaussianBlur(img, (3, 3), 0.5)
+    noise_sigma = max(1.8, 4.5 * (1.0 - wear_level * 0.60))
+    noise = np.random.normal(0, noise_sigma, img.shape).astype(np.float32)
+    img = np.clip(img.astype(np.float32) + noise, 0, 255).astype(np.uint8)
+    img = cv2.GaussianBlur(img, (3, 3), 0.35)
     return cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
 
@@ -147,28 +171,33 @@ def render_cinturato_pattern(wear_level: float = 0.0) -> np.ndarray:
     Renders Pirelli Cinturato P7 style tread:
     4 wide longitudinal grooves with compact center blocks.
     """
-    img = create_base_tread_canvas(512, 512, bg_intensity=int(135 - wear_level * 10))
-    groove_depth = int(25 + wear_level * 75)
+    bg_intensity = int(138 - wear_level * 10)
+    img = create_base_tread_canvas(512, 512, bg_intensity=bg_intensity)
+    groove_depth = int(20 + wear_level * 36)
     groove_positions = [115, 210, 310, 405]
-    groove_width = max(3, int(19 * (1.0 - wear_level * 0.4)))
+    groove_width = max(8, int(19 * (1.0 - wear_level * 0.40)))
 
     for x in groove_positions:
         cv2.line(img, (x, 0), (x, 512), color=groove_depth, thickness=groove_width)
 
-    if wear_level < 0.72:
-        sipe_depth = int(35 + wear_level * 75)
+    sipe_alpha = max(0.0, float(1.0 - (wear_level / 0.78)**1.3))
+    if sipe_alpha > 0.01:
+        sipe_canvas = img.copy()
+        sipe_depth = int(28 + wear_level * 45)
         sipe_spacing = 30
-        sipe_thickness = max(1, int(3 * (1.0 - wear_level * 0.6)))
+        thick = 2 if wear_level < 0.28 else 1
         for y in range(0, 512, sipe_spacing):
-            cv2.line(img, (10, y + 10), (105, y + 20), color=sipe_depth, thickness=sipe_thickness)
-            cv2.rectangle(img, (130, y + 5), (195, y + 25), color=sipe_depth, thickness=sipe_thickness)
-            cv2.rectangle(img, (225, y + 10), (295, y + 25), color=sipe_depth, thickness=sipe_thickness)
-            cv2.line(img, (325, y + 20), (395, y + 10), color=sipe_depth, thickness=sipe_thickness)
-            cv2.line(img, (420, y + 15), (500, y + 5), color=sipe_depth, thickness=sipe_thickness)
+            cv2.line(sipe_canvas, (10, y + 10), (105, y + 20), color=sipe_depth, thickness=thick, lineType=cv2.LINE_AA)
+            cv2.rectangle(sipe_canvas, (130, y + 5), (195, y + 25), color=sipe_depth, thickness=thick)
+            cv2.rectangle(sipe_canvas, (225, y + 10), (295, y + 25), color=sipe_depth, thickness=thick)
+            cv2.line(sipe_canvas, (325, y + 20), (395, y + 10), color=sipe_depth, thickness=thick, lineType=cv2.LINE_AA)
+            cv2.line(sipe_canvas, (420, y + 15), (500, y + 5), color=sipe_depth, thickness=thick, lineType=cv2.LINE_AA)
+        img = cv2.addWeighted(sipe_canvas, sipe_alpha, img, 1.0 - sipe_alpha, 0)
 
-    noise = np.random.normal(0, 4, img.shape).astype(np.int16)
-    img = np.clip(img.astype(np.int16) + noise, 0, 255).astype(np.uint8)
-    img = cv2.GaussianBlur(img, (3, 3), 0.5)
+    noise_sigma = max(1.8, 4.5 * (1.0 - wear_level * 0.60))
+    noise = np.random.normal(0, noise_sigma, img.shape).astype(np.float32)
+    img = np.clip(img.astype(np.float32) + noise, 0, 255).astype(np.uint8)
+    img = cv2.GaussianBlur(img, (3, 3), 0.35)
     return cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
 
@@ -177,33 +206,38 @@ def render_ventus_pattern(wear_level: float = 0.0) -> np.ndarray:
     Renders Hankook Ventus Prime 4 style tread:
     Chamfered groove edges, 3D zigzag lateral siping.
     """
-    img = create_base_tread_canvas(512, 512, bg_intensity=int(135 - wear_level * 10))
-    groove_depth = int(25 + wear_level * 75)
+    bg_intensity = int(138 - wear_level * 10)
+    img = create_base_tread_canvas(512, 512, bg_intensity=bg_intensity)
+    groove_depth = int(20 + wear_level * 36)
     groove_positions = [110, 205, 305, 410]
-    groove_width = max(3, int(18 * (1.0 - wear_level * 0.4)))
+    groove_width = max(8, int(18 * (1.0 - wear_level * 0.40)))
 
     for x in groove_positions:
         cv2.line(img, (x, 0), (x, 512), color=groove_depth, thickness=groove_width)
 
-    if wear_level < 0.72:
-        sipe_depth = int(35 + wear_level * 75)
+    sipe_alpha = max(0.0, float(1.0 - (wear_level / 0.78)**1.3))
+    if sipe_alpha > 0.01:
+        sipe_canvas = img.copy()
+        sipe_depth = int(28 + wear_level * 45)
         sipe_spacing = 36
-        sipe_thickness = max(1, int(3 * (1.0 - wear_level * 0.6)))
+        thick = 2 if wear_level < 0.28 else 1
         for y in range(0, 512, sipe_spacing):
             pts1 = np.array([[15, y], [55, y+15], [95, y]], np.int32)
-            cv2.polylines(img, [pts1], False, color=sipe_depth, thickness=sipe_thickness)
+            cv2.polylines(sipe_canvas, [pts1], False, color=sipe_depth, thickness=thick, lineType=cv2.LINE_AA)
             pts2 = np.array([[125, y+5], [160, y+20], [195, y+5]], np.int32)
-            cv2.polylines(img, [pts2], False, color=sipe_depth, thickness=sipe_thickness)
+            cv2.polylines(sipe_canvas, [pts2], False, color=sipe_depth, thickness=thick, lineType=cv2.LINE_AA)
             pts3 = np.array([[220, y+10], [260, y+25], [295, y+10]], np.int32)
-            cv2.polylines(img, [pts3], False, color=sipe_depth, thickness=sipe_thickness)
+            cv2.polylines(sipe_canvas, [pts3], False, color=sipe_depth, thickness=thick, lineType=cv2.LINE_AA)
             pts4 = np.array([[320, y+5], [360, y+20], [395, y+5]], np.int32)
-            cv2.polylines(img, [pts4], False, color=sipe_depth, thickness=sipe_thickness)
+            cv2.polylines(sipe_canvas, [pts4], False, color=sipe_depth, thickness=thick, lineType=cv2.LINE_AA)
             pts5 = np.array([[420, y], [460, y+15], [500, y]], np.int32)
-            cv2.polylines(img, [pts5], False, color=sipe_depth, thickness=sipe_thickness)
+            cv2.polylines(sipe_canvas, [pts5], False, color=sipe_depth, thickness=thick, lineType=cv2.LINE_AA)
+        img = cv2.addWeighted(sipe_canvas, sipe_alpha, img, 1.0 - sipe_alpha, 0)
 
-    noise = np.random.normal(0, 4, img.shape).astype(np.int16)
-    img = np.clip(img.astype(np.int16) + noise, 0, 255).astype(np.uint8)
-    img = cv2.GaussianBlur(img, (3, 3), 0.5)
+    noise_sigma = max(1.8, 4.5 * (1.0 - wear_level * 0.60))
+    noise = np.random.normal(0, noise_sigma, img.shape).astype(np.float32)
+    img = np.clip(img.astype(np.float32) + noise, 0, 255).astype(np.uint8)
+    img = cv2.GaussianBlur(img, (3, 3), 0.35)
     return cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
 
@@ -319,56 +353,54 @@ def generate_all_demo_assets():
         render_primacy4_pattern,
         render_premiumcontact6_pattern,
         render_turanza_pattern,
-        render_efficientgrip_pattern,
-        render_cinturato_pattern,
-        render_ventus_pattern
+        render_efficientgrip_pattern
     ]
 
-    # Generate Good class
+    # Generate Good class (wear 0.08 - 0.20: near-new tread, intact sipes & deep channels)
     for i in range(1, 5):
         tyre_id = f"tyre_g0{i}"
         gen = tyre_types[(i - 1) % len(tyre_types)]
-        for angle_idx, rot in enumerate([0.0, 3.0, -3.0]):
-            wear = np.random.uniform(0.05, 0.20)
+        for angle_idx, rot in enumerate([0.0, 3.5, -3.5]):
+            wear = np.random.uniform(0.08, 0.20)
             base = gen(wear_level=wear)
             if abs(rot) > 0.1:
                 M = cv2.getRotationMatrix2D((256, 256), rot, 1.0)
                 base = cv2.warpAffine(base, M, (512, 512), borderMode=cv2.BORDER_REFLECT)
-            # Add realistic sensor noise and lighting variation
-            gain = np.random.uniform(0.92, 1.08)
-            noise = np.random.normal(0, np.random.uniform(2.0, 5.0), base.shape).astype(np.float32)
+            # Realistic sensor noise and lighting variation (standardized across classes)
+            gain = np.random.uniform(0.95, 1.05)
+            noise = np.random.normal(0, np.random.uniform(2.0, 4.0), base.shape).astype(np.float32)
             final_img = np.clip(base.astype(np.float32) * gain + noise, 0, 255).astype(np.uint8)
             fname = f"{tyre_id}_view{angle_idx + 1}.jpg"
             cv2.imwrite(str(WEAR_DATA_DIR / "good" / fname), final_img)
 
-    # Generate Moderate class
+    # Generate Moderate class (wear 0.42 - 0.56: mid-life tread, thinned sipes, degraded relief)
     for i in range(1, 5):
         tyre_id = f"tyre_m0{i}"
-        gen = tyre_types[(i + 1) % len(tyre_types)]
-        for angle_idx, rot in enumerate([0.0, 4.0, -4.0]):
-            wear = np.random.uniform(0.45, 0.60)
+        gen = tyre_types[(i - 1) % len(tyre_types)]
+        for angle_idx, rot in enumerate([0.0, 3.5, -3.5]):
+            wear = np.random.uniform(0.42, 0.56)
             base = gen(wear_level=wear)
             if abs(rot) > 0.1:
                 M = cv2.getRotationMatrix2D((256, 256), rot, 1.0)
                 base = cv2.warpAffine(base, M, (512, 512), borderMode=cv2.BORDER_REFLECT)
-            gain = np.random.uniform(0.92, 1.08)
-            noise = np.random.normal(0, np.random.uniform(2.0, 5.0), base.shape).astype(np.float32)
+            gain = np.random.uniform(0.95, 1.05)
+            noise = np.random.normal(0, np.random.uniform(2.0, 4.0), base.shape).astype(np.float32)
             final_img = np.clip(base.astype(np.float32) * gain + noise, 0, 255).astype(np.uint8)
             fname = f"{tyre_id}_view{angle_idx + 1}.jpg"
             cv2.imwrite(str(WEAR_DATA_DIR / "moderate" / fname), final_img)
 
-    # Generate Worn class
+    # Generate Worn class (wear 0.80 - 0.92: legal-limit/worn tread, vanished sipes, shallow grooves)
     for i in range(1, 5):
         tyre_id = f"tyre_w0{i}"
-        gen = tyre_types[(i + 3) % len(tyre_types)]
-        for angle_idx, rot in enumerate([0.0, 5.0, -5.0]):
-            wear = np.random.uniform(0.80, 0.95)
+        gen = tyre_types[(i - 1) % len(tyre_types)]
+        for angle_idx, rot in enumerate([0.0, 3.5, -3.5]):
+            wear = np.random.uniform(0.80, 0.92)
             base = gen(wear_level=wear)
             if abs(rot) > 0.1:
                 M = cv2.getRotationMatrix2D((256, 256), rot, 1.0)
                 base = cv2.warpAffine(base, M, (512, 512), borderMode=cv2.BORDER_REFLECT)
-            gain = np.random.uniform(0.92, 1.08)
-            noise = np.random.normal(0, np.random.uniform(2.0, 5.0), base.shape).astype(np.float32)
+            gain = np.random.uniform(0.95, 1.05)
+            noise = np.random.normal(0, np.random.uniform(2.0, 4.0), base.shape).astype(np.float32)
             final_img = np.clip(base.astype(np.float32) * gain + noise, 0, 255).astype(np.uint8)
             fname = f"{tyre_id}_view{angle_idx + 1}.jpg"
             cv2.imwrite(str(WEAR_DATA_DIR / "worn" / fname), final_img)

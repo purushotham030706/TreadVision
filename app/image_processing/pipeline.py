@@ -52,6 +52,7 @@ class ImageProcessingPipeline:
         segmentation_method: str = "otsu",
         canny_low: int = 50,
         canny_high: int = 150,
+        use_adaptive_canny: bool = True,
         morph_op: str = "closing",
         morph_kernel_size: Tuple[int, int] = (3, 3)
     ):
@@ -62,6 +63,7 @@ class ImageProcessingPipeline:
         self.segmentation_method = segmentation_method
         self.canny_low = canny_low
         self.canny_high = canny_high
+        self.use_adaptive_canny = use_adaptive_canny
         self.morph_op = morph_op
         self.morph_kernel_size = morph_kernel_size
 
@@ -107,7 +109,15 @@ class ImageProcessingPipeline:
         )
 
         # Stage 8: Edge Detection
-        canny_edges = detect_canny_edges(enhanced, low_threshold=self.canny_low, high_threshold=self.canny_high)
+        if self.use_adaptive_canny:
+            canny_edges = detect_canny_edges(enhanced, adaptive=True)
+        else:
+            canny_edges = detect_canny_edges(
+                enhanced,
+                low_threshold=self.canny_low,
+                high_threshold=self.canny_high,
+                adaptive=False
+            )
         # Mask edges with segmented tread to focus strictly on tread contact patch
         tread_edges = cv2.bitwise_and(canny_edges, canny_edges, mask=morph_cleaned)
 
@@ -115,11 +125,12 @@ class ImageProcessingPipeline:
         sobel_mag, grad_x, grad_y = detect_sobel_edges(enhanced)
         laplacian_mag = detect_laplacian_edges(enhanced)
 
-        # Stage 9: Feature Extraction & Fusion
+        # Stage 9: Feature Extraction & Fusion (31-D Augmented Feature Space)
         features_dict, feature_vector = FeatureFusion.extract_all(
             enhanced_gray=enhanced,
             edge_map=tread_edges,
-            binary_mask=morph_cleaned
+            binary_mask=morph_cleaned,
+            raw_image=cv_img
         )
 
         elapsed_ms = (time.perf_counter() - start_time) * 1000.0

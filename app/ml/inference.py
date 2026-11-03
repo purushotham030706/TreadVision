@@ -57,8 +57,15 @@ class WearInferenceEngine:
         """
         if self.is_model_trained():
             try:
-                # Ensure 2D shape (1, 25)
+                # Ensure 2D shape and validate feature dimension against loaded scaler
                 feat_2d = feature_vector.reshape(1, -1)
+                expected_dim = getattr(self.scaler, "n_features_in_", 31)
+                if feat_2d.shape[1] != expected_dim:
+                    raise ValueError(
+                        f"Feature vector dimension mismatch: model expects {expected_dim} features, "
+                        f"but received {feat_2d.shape[1]} features."
+                    )
+
                 feat_scaled = self.scaler.transform(feat_2d)
 
                 pred_idx = self.model.predict(feat_scaled)[0]
@@ -67,7 +74,7 @@ class WearInferenceEngine:
                 else:
                     pred_class = str(WEAR_CLASSES[pred_idx])
 
-                # Probabilities
+                # Tree ensemble vote fractions / class score distribution
                 probabilities = {}
                 confidence = 0.85
                 if hasattr(self.model, "predict_proba"):
@@ -82,7 +89,7 @@ class WearInferenceEngine:
                     "label": WEAR_LABELS.get(pred_class, pred_class.title()),
                     "confidence": round(confidence, 3),
                     "probabilities": probabilities,
-                    "engine": f"Trained ML Model ({self.model_type.upper()})",
+                    "engine": f"Trained ML Model ({self.model_type.upper()} - {feat_2d.shape[1]}D)",
                     "model_metrics": self.metrics,
                     "is_fallback": False
                 }

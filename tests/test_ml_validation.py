@@ -78,7 +78,7 @@ def test_stratified_group_kfold_cross_validation_leakage(wear_data):
         assert len(val_classes) == len(WEAR_CLASSES), f"CV Fold {fold_idx} missing classes in validation"
 
 
-def test_model_training_and_metrics_generation(wear_data):
+def test_model_training_and_metrics_generation(wear_data, tmp_path):
     """Verify that ModelTrainer computes all required metrics and records physical tyre groups."""
     dataset_mgr, X, y, groups = wear_data
     if len(X) < 12:
@@ -88,7 +88,7 @@ def test_model_training_and_metrics_generation(wear_data):
         X, y, groups, test_size=0.25, random_state=42, return_groups=True
     )
 
-    trainer = ModelTrainer()
+    trainer = ModelTrainer(models_dir=tmp_path)
     _, metrics = trainer.train_and_evaluate(
         X_train, X_test, y_train, y_test,
         groups_train=groups_train,

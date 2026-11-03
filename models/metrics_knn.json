@@ -1,19 +1,53 @@
 {
   "model_type": "knn",
-  "accuracy": 0.6667,
-  "precision": 0.5,
-  "recall": 0.6667,
-  "f1_score": 0.5556,
+  "feature_dimension": 31,
+  "feature_names": [
+    "edge_total_density",
+    "edge_horiz_density",
+    "edge_vert_density",
+    "edge_orient_mean",
+    "edge_orient_std",
+    "texture_contrast",
+    "texture_dissimilarity",
+    "texture_homogeneity",
+    "texture_energy",
+    "texture_correlation",
+    "texture_asm",
+    "shape_area_ratio",
+    "shape_perimeter_ratio",
+    "shape_aspect_ratio",
+    "shape_extent",
+    "shape_solidity",
+    "shape_circularity",
+    "shape_equiv_diameter",
+    "hu_moment_1",
+    "hu_moment_2",
+    "hu_moment_3",
+    "hu_moment_4",
+    "hu_moment_5",
+    "hu_moment_6",
+    "hu_moment_7",
+    "groove_to_land_contrast",
+    "groove_visibility_ratio",
+    "sipe_visibility_freq",
+    "local_groove_continuity",
+    "local_texture_contrast",
+    "groove_wall_gradient"
+  ],
+  "accuracy": 0.8889,
+  "precision": 0.9167,
+  "recall": 0.8889,
+  "f1_score": 0.8857,
   "confusion_matrix": [
     [
-      0,
       3,
+      0,
       0
     ],
     [
       0,
-      3,
-      0
+      2,
+      1
     ],
     [
       0,
@@ -22,11 +56,11 @@
     ]
   ],
   "cv_scores": [
-    0.6667,
-    0.7778,
-    0.6667
+    1.0,
+    0.8889,
+    0.7778
   ],
-  "cv_mean": 0.7037,
+  "cv_mean": 0.8889,
   "cv_fold_details": [
     {
       "fold": 1,
@@ -40,7 +74,7 @@
         "moderate": 3,
         "worn": 3
       },
-      "accuracy": 0.6667
+      "accuracy": 1.0
     },
     {
       "fold": 2,
@@ -54,7 +88,7 @@
         "moderate": 3,
         "worn": 3
       },
-      "accuracy": 0.7778
+      "accuracy": 0.8889
     },
     {
       "fold": 3,
@@ -68,7 +102,7 @@
         "moderate": 3,
         "worn": 3
       },
-      "accuracy": 0.6667
+      "accuracy": 0.7778
     }
   ],
   "train_samples": 27,
@@ -90,38 +124,40 @@
     "tyre_w03"
   ],
   "leakage_check_passed": true,
+  "evaluation_protocol": "Production 4-fold StratifiedGroupKFold outer split (27 train views across 9 physical tyres, 9 test views across 3 physical tyres) with 3-fold inner group-aware CV. Evaluated separately from earlier exploratory experimental runs.",
+  "probability_interpretation": "Random Forest tree ensemble vote fractions (not empirically calibrated probabilities)",
   "validation_type": "Calibrated prototype validation",
   "dataset_limitation": "Current classifier validation is based on controlled reference images. Real-world performance requires validation against independently collected tyre photographs across manufacturers, lighting conditions, cameras, angles and tread conditions.",
   "classification_report": {
     "good": {
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1-score": 0.0,
-      "support": 3.0
-    },
-    "moderate": {
-      "precision": 0.5,
-      "recall": 1.0,
-      "f1-score": 0.6666666666666666,
-      "support": 3.0
-    },
-    "worn": {
       "precision": 1.0,
       "recall": 1.0,
       "f1-score": 1.0,
       "support": 3.0
     },
-    "accuracy": 0.6666666666666666,
-    "macro avg": {
-      "precision": 0.5,
+    "moderate": {
+      "precision": 1.0,
       "recall": 0.6666666666666666,
-      "f1-score": 0.5555555555555555,
+      "f1-score": 0.8,
+      "support": 3.0
+    },
+    "worn": {
+      "precision": 0.75,
+      "recall": 1.0,
+      "f1-score": 0.8571428571428571,
+      "support": 3.0
+    },
+    "accuracy": 0.8888888888888888,
+    "macro avg": {
+      "precision": 0.9166666666666666,
+      "recall": 0.8888888888888888,
+      "f1-score": 0.8857142857142857,
       "support": 9.0
     },
     "weighted avg": {
-      "precision": 0.5,
-      "recall": 0.6666666666666666,
-      "f1-score": 0.5555555555555556,
+      "precision": 0.9166666666666666,
+      "recall": 0.8888888888888888,
+      "f1-score": 0.8857142857142857,
       "support": 9.0
     }
   },

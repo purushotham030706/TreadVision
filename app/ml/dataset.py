@@ -13,6 +13,7 @@ from sklearn.preprocessing import LabelEncoder
 
 from app.config import WEAR_DATA_DIR, WEAR_CLASSES
 from app.image_processing.pipeline import ImageProcessingPipeline
+from app.image_processing.feature_fusion import FEATURE_NAMES
 
 
 class WearDataset:
@@ -87,7 +88,7 @@ class WearDataset:
                 paths_list.append(rec["file_path"])
 
         if not X_list:
-            return np.empty((0, 25)), np.empty(0), np.empty(0), []
+            return np.empty((0, len(FEATURE_NAMES))), np.empty(0), np.empty(0), []
 
         X = np.array(X_list, dtype=np.float32)
         y = self.label_encoder.transform(y_list)

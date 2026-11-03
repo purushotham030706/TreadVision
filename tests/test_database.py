@@ -32,9 +32,9 @@ def test_isolated_database_queries(isolated_db_session):
     assert michelin.features is not None
     assert len(michelin.sizes) > 0
 
-    # Check features deserialization
+    # Check features deserialization (31-D augmented feature vector)
     vec = michelin.features.get_feature_vector()
-    assert len(vec) == 25
+    assert len(vec) == 31
 
 
 def test_database_integrity_verification(isolated_engine, isolated_db_session):

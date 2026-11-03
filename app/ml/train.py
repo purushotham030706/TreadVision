@@ -19,6 +19,7 @@ import copy
 from app.config import MODELS_DIR, WEAR_CLASSES
 from app.ml.dataset import WearDataset
 from app.ml.models import get_model
+from app.image_processing.feature_fusion import FEATURE_NAMES
 
 
 class ModelTrainer:
@@ -110,6 +111,8 @@ class ModelTrainer:
 
         metrics = {
             "model_type": model_type,
+            "feature_dimension": int(X_train.shape[1]),
+            "feature_names": FEATURE_NAMES,
             "accuracy": round(acc, 4),
             "precision": round(prec, 4),
             "recall": round(rec, 4),
@@ -123,6 +126,12 @@ class ModelTrainer:
             "train_physical_tyres": train_tyres,
             "test_physical_tyres": test_tyres,
             "leakage_check_passed": leakage_check,
+            "evaluation_protocol": (
+                "Production 4-fold StratifiedGroupKFold outer split (27 train views across 9 physical tyres, "
+                "9 test views across 3 physical tyres) with 3-fold inner group-aware CV. "
+                "Evaluated separately from earlier exploratory experimental runs."
+            ),
+            "probability_interpretation": "Random Forest tree ensemble vote fractions (not empirically calibrated probabilities)",
             "validation_type": "Calibrated prototype validation",
             "dataset_limitation": (
                 "Current classifier validation is based on controlled reference images. "

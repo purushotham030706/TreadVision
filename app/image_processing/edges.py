@@ -1,22 +1,53 @@
 """
 TreadVision: Edge Detection and Edge Orientation Feature Extraction
 """
-from typing import Tuple, Dict, Any
+from typing import Tuple, Dict, Any, Optional
 import cv2
 import numpy as np
 
 
+def compute_adaptive_canny_thresholds(gray: np.ndarray) -> Tuple[int, int]:
+    """
+    Computes image-dependent adaptive Canny thresholds based on the
+    Otsu partitioning of the gradient magnitude distribution.
+    Binds lower threshold to [15, 120] and upper threshold to [40, 220].
+    """
+    if len(gray.shape) == 3:
+        gray = cv2.cvtColor(gray, cv2.COLOR_BGR2GRAY)
+    sx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)
+    sy = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=3)
+    mag = np.sqrt(sx**2 + sy**2)
+    max_mag = np.max(mag) if np.max(mag) > 0 else 1.0
+
+    mag_u8 = np.clip(mag / max_mag * 255.0, 0, 255).astype(np.uint8)
+    otsu_th, _ = cv2.threshold(mag_u8, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+    th_high = (otsu_th / 255.0) * max_mag
+    th_low = 0.40 * th_high
+
+    lower = int(np.clip(th_low, 15, 120))
+    upper = int(np.clip(th_high, 40, 220))
+    return lower, upper
+
+
 def detect_canny_edges(
     image: np.ndarray,
-    low_threshold: int = 50,
-    high_threshold: int = 150,
-    aperture_size: int = 3
+    low_threshold: Optional[int] = None,
+    high_threshold: Optional[int] = None,
+    aperture_size: int = 3,
+    adaptive: bool = True
 ) -> np.ndarray:
     """
     Canny Edge Detector with non-maximum suppression and hysteresis thresholding.
-    Produces thin, well-localized edge contours defining tread grooves.
+    If adaptive=True (or thresholds not provided), computes dynamic thresholds via
+    Otsu gradient magnitude partitioning.
+    If explicit low_threshold and high_threshold are passed and adaptive=False, uses fixed thresholds.
     """
-    return cv2.Canny(image, low_threshold, high_threshold, apertureSize=aperture_size)
+    if adaptive or low_threshold is None or high_threshold is None:
+        low_th, high_th = compute_adaptive_canny_thresholds(image)
+    else:
+        low_th, high_th = low_threshold, high_threshold
+    return cv2.Canny(image, low_th, high_th, apertureSize=aperture_size)
 
 
 def detect_sobel_edges(image: np.ndarray, ksize: int = 3) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:

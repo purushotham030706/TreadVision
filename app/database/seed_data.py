@@ -12,6 +12,7 @@ from app.config import REFERENCE_PATTERNS_DIR
 from app.database.connection import SessionLocal, init_db, verify_database_integrity
 from app.database.models import Tyre, TreadPattern, TyreSize, Vehicle, Fitment, TreadFeatures
 from app.image_processing.pipeline import ImageProcessingPipeline
+from app.image_processing.feature_fusion import FEATURE_NAMES
 
 # Real, authentic automotive reference records
 TYRE_CATALOG = [
@@ -302,7 +303,7 @@ def seed_database(
                     print(f"Failed to extract features for {img_path}: {pipe_res.error_message}")
             else:
                 # Fallback dummy features if asset image is not rendered yet
-                dummy_vec = [0.1] * 25
+                dummy_vec = [0.1] * len(FEATURE_NAMES)
                 tf = TreadFeatures(
                     tyre_id=tyre.id,
                     edge_features=json.dumps({"total_edge_density": 0.1}),

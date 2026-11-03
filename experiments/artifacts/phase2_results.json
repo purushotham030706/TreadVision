@@ -1,0 +1,1304 @@
+{
+  "A (Baseline 25-D)": {
+    "rf": {
+      "holdout_acc": 1.0,
+      "macro_prec": 1.0,
+      "macro_rec": 1.0,
+      "macro_f1": 1.0,
+      "confusion_matrix": [
+        [
+          3,
+          0,
+          0
+        ],
+        [
+          0,
+          3,
+          0
+        ],
+        [
+          0,
+          0,
+          3
+        ]
+      ],
+      "report": {
+        "good": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "moderate": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "worn": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "accuracy": 1.0,
+        "macro avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 9.0
+        },
+        "weighted avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 9.0
+        }
+      },
+      "cv_accs": [
+        0.8888888888888888,
+        1.0,
+        1.0
+      ],
+      "cv_acc_mean": 0.9629629629629629,
+      "cv_acc_std": 0.05237828008789243,
+      "cv_f1s": [
+        0.8857142857142857,
+        1.0,
+        1.0
+      ],
+      "cv_f1_mean": 0.9619047619047619,
+      "cv_f1_std": 0.05387480237611793,
+      "sample_preds": [
+        {
+          "filename": "tyre_g04_view1.jpg",
+          "tyre_id": "tyre_g04",
+          "true_label": "good",
+          "pred_label": "good",
+          "confidence": 0.78,
+          "correct": true
+        },
+        {
+          "filename": "tyre_g04_view2.jpg",
+          "tyre_id": "tyre_g04",
+          "true_label": "good",
+          "pred_label": "good",
+          "confidence": 0.82,
+          "correct": true
+        },
+        {
+          "filename": "tyre_g04_view3.jpg",
+          "tyre_id": "tyre_g04",
+          "true_label": "good",
+          "pred_label": "good",
+          "confidence": 0.82,
+          "correct": true
+        },
+        {
+          "filename": "tyre_m02_view1.jpg",
+          "tyre_id": "tyre_m02",
+          "true_label": "moderate",
+          "pred_label": "moderate",
+          "confidence": 0.8533333333333334,
+          "correct": true
+        },
+        {
+          "filename": "tyre_m02_view2.jpg",
+          "tyre_id": "tyre_m02",
+          "true_label": "moderate",
+          "pred_label": "moderate",
+          "confidence": 0.8,
+          "correct": true
+        },
+        {
+          "filename": "tyre_m02_view3.jpg",
+          "tyre_id": "tyre_m02",
+          "true_label": "moderate",
+          "pred_label": "moderate",
+          "confidence": 0.6466666666666666,
+          "correct": true
+        },
+        {
+          "filename": "tyre_w03_view1.jpg",
+          "tyre_id": "tyre_w03",
+          "true_label": "worn",
+          "pred_label": "worn",
+          "confidence": 0.9733333333333334,
+          "correct": true
+        },
+        {
+          "filename": "tyre_w03_view2.jpg",
+          "tyre_id": "tyre_w03",
+          "true_label": "worn",
+          "pred_label": "worn",
+          "confidence": 0.9333333333333333,
+          "correct": true
+        },
+        {
+          "filename": "tyre_w03_view3.jpg",
+          "tyre_id": "tyre_w03",
+          "true_label": "worn",
+          "pred_label": "worn",
+          "confidence": 0.96,
+          "correct": true
+        }
+      ]
+    },
+    "svm": {
+      "holdout_acc": 1.0,
+      "macro_prec": 1.0,
+      "macro_rec": 1.0,
+      "macro_f1": 1.0,
+      "confusion_matrix": [
+        [
+          3,
+          0,
+          0
+        ],
+        [
+          0,
+          3,
+          0
+        ],
+        [
+          0,
+          0,
+          3
+        ]
+      ],
+      "report": {
+        "good": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "moderate": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "worn": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "accuracy": 1.0,
+        "macro avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 9.0
+        },
+        "weighted avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 9.0
+        }
+      },
+      "cv_accs": [
+        1.0,
+        0.5555555555555556,
+        1.0
+      ],
+      "cv_acc_mean": 0.8518518518518517,
+      "cv_acc_std": 0.20951312035156963,
+      "cv_f1s": [
+        1.0,
+        0.5,
+        1.0
+      ],
+      "cv_f1_mean": 0.8333333333333334,
+      "cv_f1_std": 0.23570226039551584,
+      "sample_preds": [
+        {
+          "filename": "tyre_g04_view1.jpg",
+          "tyre_id": "tyre_g04",
+          "true_label": "good",
+          "pred_label": "good",
+          "confidence": 0.9101608607353809,
+          "correct": true
+        },
+        {
+          "filename": "tyre_g04_view2.jpg",
+          "tyre_id": "tyre_g04",
+          "true_label": "good",
+          "pred_label": "good",
+          "confidence": 0.9042858102193934,
+          "correct": true
+        },
+        {
+          "filename": "tyre_g04_view3.jpg",
+          "tyre_id": "tyre_g04",
+          "true_label": "good",
+          "pred_label": "good",
+          "confidence": 0.9007912222884752,
+          "correct": true
+        },
+        {
+          "filename": "tyre_m02_view1.jpg",
+          "tyre_id": "tyre_m02",
+          "true_label": "moderate",
+          "pred_label": "moderate",
+          "confidence": 0.870959025549694,
+          "correct": true
+        },
+        {
+          "filename": "tyre_m02_view2.jpg",
+          "tyre_id": "tyre_m02",
+          "true_label": "moderate",
+          "pred_label": "moderate",
+          "confidence": 0.8395524481610531,
+          "correct": true
+        },
+        {
+          "filename": "tyre_m02_view3.jpg",
+          "tyre_id": "tyre_m02",
+          "true_label": "moderate",
+          "pred_label": "moderate",
+          "confidence": 0.8513969917761065,
+          "correct": true
+        },
+        {
+          "filename": "tyre_w03_view1.jpg",
+          "tyre_id": "tyre_w03",
+          "true_label": "worn",
+          "pred_label": "worn",
+          "confidence": 0.8455641994345007,
+          "correct": true
+        },
+        {
+          "filename": "tyre_w03_view2.jpg",
+          "tyre_id": "tyre_w03",
+          "true_label": "worn",
+          "pred_label": "worn",
+          "confidence": 0.897623451974893,
+          "correct": true
+        },
+        {
+          "filename": "tyre_w03_view3.jpg",
+          "tyre_id": "tyre_w03",
+          "true_label": "worn",
+          "pred_label": "worn",
+          "confidence": 0.8969288960372599,
+          "correct": true
+        }
+      ]
+    },
+    "knn": {
+      "holdout_acc": 0.7777777777777778,
+      "macro_prec": 0.8666666666666667,
+      "macro_rec": 0.7777777777777777,
+      "macro_f1": 0.75,
+      "confusion_matrix": [
+        [
+          3,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          2
+        ],
+        [
+          0,
+          0,
+          3
+        ]
+      ],
+      "report": {
+        "good": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "moderate": {
+          "precision": 1.0,
+          "recall": 0.3333333333333333,
+          "f1-score": 0.5,
+          "support": 3.0
+        },
+        "worn": {
+          "precision": 0.6,
+          "recall": 1.0,
+          "f1-score": 0.75,
+          "support": 3.0
+        },
+        "accuracy": 0.7777777777777778,
+        "macro avg": {
+          "precision": 0.8666666666666667,
+          "recall": 0.7777777777777777,
+          "f1-score": 0.75,
+          "support": 9.0
+        },
+        "weighted avg": {
+          "precision": 0.8666666666666667,
+          "recall": 0.7777777777777778,
+          "f1-score": 0.75,
+          "support": 9.0
+        }
+      },
+      "cv_accs": [
+        1.0,
+        0.6666666666666666,
+        0.6666666666666666
+      ],
+      "cv_acc_mean": 0.7777777777777777,
+      "cv_acc_std": 0.15713484026367724,
+      "cv_f1s": [
+        1.0,
+        0.6571428571428571,
+        0.6571428571428571
+      ],
+      "cv_f1_mean": 0.7714285714285714,
+      "cv_f1_std": 0.16162440712835371,
+      "sample_preds": [
+        {
+          "filename": "tyre_g04_view1.jpg",
+          "tyre_id": "tyre_g04",
+          "true_label": "good",
+          "pred_label": "good",
+          "confidence": 1.0,
+          "correct": true
+        },
+        {
+          "filename": "tyre_g04_view2.jpg",
+          "tyre_id": "tyre_g04",
+          "true_label": "good",
+          "pred_label": "good",
+          "confidence": 1.0,
+          "correct": true
+        },
+        {
+          "filename": "tyre_g04_view3.jpg",
+          "tyre_id": "tyre_g04",
+          "true_label": "good",
+          "pred_label": "good",
+          "confidence": 1.0,
+          "correct": true
+        },
+        {
+          "filename": "tyre_m02_view1.jpg",
+          "tyre_id": "tyre_m02",
+          "true_label": "moderate",
+          "pred_label": "moderate",
+          "confidence": 0.5721108114651909,
+          "correct": true
+        },
+        {
+          "filename": "tyre_m02_view2.jpg",
+          "tyre_id": "tyre_m02",
+          "true_label": "moderate",
+          "pred_label": "worn",
+          "confidence": 0.5766178336875506,
+          "correct": false
+        },
+        {
+          "filename": "tyre_m02_view3.jpg",
+          "tyre_id": "tyre_m02",
+          "true_label": "moderate",
+          "pred_label": "worn",
+          "confidence": 0.639297653686001,
+          "correct": false
+        },
+        {
+          "filename": "tyre_w03_view1.jpg",
+          "tyre_id": "tyre_w03",
+          "true_label": "worn",
+          "pred_label": "worn",
+          "confidence": 0.5823280288930752,
+          "correct": true
+        },
+        {
+          "filename": "tyre_w03_view2.jpg",
+          "tyre_id": "tyre_w03",
+          "true_label": "worn",
+          "pred_label": "worn",
+          "confidence": 0.5569928856165963,
+          "correct": true
+        },
+        {
+          "filename": "tyre_w03_view3.jpg",
+          "tyre_id": "tyre_w03",
+          "true_label": "worn",
+          "pred_label": "worn",
+          "confidence": 0.5726806359091255,
+          "correct": true
+        }
+      ]
+    }
+  },
+  "B (Augmented 31-D)": {
+    "rf": {
+      "holdout_acc": 1.0,
+      "macro_prec": 1.0,
+      "macro_rec": 1.0,
+      "macro_f1": 1.0,
+      "confusion_matrix": [
+        [
+          3,
+          0,
+          0
+        ],
+        [
+          0,
+          3,
+          0
+        ],
+        [
+          0,
+          0,
+          3
+        ]
+      ],
+      "report": {
+        "good": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "moderate": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "worn": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "accuracy": 1.0,
+        "macro avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 9.0
+        },
+        "weighted avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 9.0
+        }
+      },
+      "cv_accs": [
+        0.8888888888888888,
+        1.0,
+        1.0
+      ],
+      "cv_acc_mean": 0.9629629629629629,
+      "cv_acc_std": 0.05237828008789243,
+      "cv_f1s": [
+        0.8857142857142857,
+        1.0,
+        1.0
+      ],
+      "cv_f1_mean": 0.9619047619047619,
+      "cv_f1_std": 0.05387480237611793,
+      "sample_preds": [
+        {
+          "filename": "tyre_g04_view1.jpg",
+          "tyre_id": "tyre_g04",
+          "true_label": "good",
+          "pred_label": "good",
+          "confidence": 0.84,
+          "correct": true
+        },
+        {
+          "filename": "tyre_g04_view2.jpg",
+          "tyre_id": "tyre_g04",
+          "true_label": "good",
+          "pred_label": "good",
+          "confidence": 0.8533333333333334,
+          "correct": true
+        },
+        {
+          "filename": "tyre_g04_view3.jpg",
+          "tyre_id": "tyre_g04",
+          "true_label": "good",
+          "pred_label": "good",
+          "confidence": 0.8533333333333334,
+          "correct": true
+        },
+        {
+          "filename": "tyre_m02_view1.jpg",
+          "tyre_id": "tyre_m02",
+          "true_label": "moderate",
+          "pred_label": "moderate",
+          "confidence": 0.9133333333333333,
+          "correct": true
+        },
+        {
+          "filename": "tyre_m02_view2.jpg",
+          "tyre_id": "tyre_m02",
+          "true_label": "moderate",
+          "pred_label": "moderate",
+          "confidence": 0.8466666666666667,
+          "correct": true
+        },
+        {
+          "filename": "tyre_m02_view3.jpg",
+          "tyre_id": "tyre_m02",
+          "true_label": "moderate",
+          "pred_label": "moderate",
+          "confidence": 0.7533333333333333,
+          "correct": true
+        },
+        {
+          "filename": "tyre_w03_view1.jpg",
+          "tyre_id": "tyre_w03",
+          "true_label": "worn",
+          "pred_label": "worn",
+          "confidence": 0.9333333333333333,
+          "correct": true
+        },
+        {
+          "filename": "tyre_w03_view2.jpg",
+          "tyre_id": "tyre_w03",
+          "true_label": "worn",
+          "pred_label": "worn",
+          "confidence": 0.9533333333333334,
+          "correct": true
+        },
+        {
+          "filename": "tyre_w03_view3.jpg",
+          "tyre_id": "tyre_w03",
+          "true_label": "worn",
+          "pred_label": "worn",
+          "confidence": 0.9733333333333334,
+          "correct": true
+        }
+      ]
+    },
+    "svm": {
+      "holdout_acc": 1.0,
+      "macro_prec": 1.0,
+      "macro_rec": 1.0,
+      "macro_f1": 1.0,
+      "confusion_matrix": [
+        [
+          3,
+          0,
+          0
+        ],
+        [
+          0,
+          3,
+          0
+        ],
+        [
+          0,
+          0,
+          3
+        ]
+      ],
+      "report": {
+        "good": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "moderate": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "worn": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "accuracy": 1.0,
+        "macro avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 9.0
+        },
+        "weighted avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 9.0
+        }
+      },
+      "cv_accs": [
+        1.0,
+        0.8888888888888888,
+        1.0
+      ],
+      "cv_acc_mean": 0.9629629629629629,
+      "cv_acc_std": 0.05237828008789243,
+      "cv_f1s": [
+        1.0,
+        0.8857142857142858,
+        1.0
+      ],
+      "cv_f1_mean": 0.9619047619047619,
+      "cv_f1_std": 0.05387480237611787,
+      "sample_preds": [
+        {
+          "filename": "tyre_g04_view1.jpg",
+          "tyre_id": "tyre_g04",
+          "true_label": "good",
+          "pred_label": "good",
+          "confidence": 0.9369364273150267,
+          "correct": true
+        },
+        {
+          "filename": "tyre_g04_view2.jpg",
+          "tyre_id": "tyre_g04",
+          "true_label": "good",
+          "pred_label": "good",
+          "confidence": 0.90041734360639,
+          "correct": true
+        },
+        {
+          "filename": "tyre_g04_view3.jpg",
+          "tyre_id": "tyre_g04",
+          "true_label": "good",
+          "pred_label": "good",
+          "confidence": 0.8960224968420304,
+          "correct": true
+        },
+        {
+          "filename": "tyre_m02_view1.jpg",
+          "tyre_id": "tyre_m02",
+          "true_label": "moderate",
+          "pred_label": "moderate",
+          "confidence": 0.8487656195795629,
+          "correct": true
+        },
+        {
+          "filename": "tyre_m02_view2.jpg",
+          "tyre_id": "tyre_m02",
+          "true_label": "moderate",
+          "pred_label": "moderate",
+          "confidence": 0.8258298288576413,
+          "correct": true
+        },
+        {
+          "filename": "tyre_m02_view3.jpg",
+          "tyre_id": "tyre_m02",
+          "true_label": "moderate",
+          "pred_label": "moderate",
+          "confidence": 0.8351168289197509,
+          "correct": true
+        },
+        {
+          "filename": "tyre_w03_view1.jpg",
+          "tyre_id": "tyre_w03",
+          "true_label": "worn",
+          "pred_label": "worn",
+          "confidence": 0.8535646559103097,
+          "correct": true
+        },
+        {
+          "filename": "tyre_w03_view2.jpg",
+          "tyre_id": "tyre_w03",
+          "true_label": "worn",
+          "pred_label": "worn",
+          "confidence": 0.9042781951597239,
+          "correct": true
+        },
+        {
+          "filename": "tyre_w03_view3.jpg",
+          "tyre_id": "tyre_w03",
+          "true_label": "worn",
+          "pred_label": "worn",
+          "confidence": 0.9052873162705972,
+          "correct": true
+        }
+      ]
+    },
+    "knn": {
+      "holdout_acc": 0.8888888888888888,
+      "macro_prec": 0.9166666666666666,
+      "macro_rec": 0.8888888888888888,
+      "macro_f1": 0.8857142857142857,
+      "confusion_matrix": [
+        [
+          3,
+          0,
+          0
+        ],
+        [
+          0,
+          2,
+          1
+        ],
+        [
+          0,
+          0,
+          3
+        ]
+      ],
+      "report": {
+        "good": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "moderate": {
+          "precision": 1.0,
+          "recall": 0.6666666666666666,
+          "f1-score": 0.8,
+          "support": 3.0
+        },
+        "worn": {
+          "precision": 0.75,
+          "recall": 1.0,
+          "f1-score": 0.8571428571428571,
+          "support": 3.0
+        },
+        "accuracy": 0.8888888888888888,
+        "macro avg": {
+          "precision": 0.9166666666666666,
+          "recall": 0.8888888888888888,
+          "f1-score": 0.8857142857142857,
+          "support": 9.0
+        },
+        "weighted avg": {
+          "precision": 0.9166666666666666,
+          "recall": 0.8888888888888888,
+          "f1-score": 0.8857142857142857,
+          "support": 9.0
+        }
+      },
+      "cv_accs": [
+        1.0,
+        0.8888888888888888,
+        0.7777777777777778
+      ],
+      "cv_acc_mean": 0.8888888888888888,
+      "cv_acc_std": 0.09072184232530289,
+      "cv_f1s": [
+        1.0,
+        0.8857142857142858,
+        0.75
+      ],
+      "cv_f1_mean": 0.8785714285714286,
+      "cv_f1_std": 0.10218697016130922,
+      "sample_preds": [
+        {
+          "filename": "tyre_g04_view1.jpg",
+          "tyre_id": "tyre_g04",
+          "true_label": "good",
+          "pred_label": "good",
+          "confidence": 1.0,
+          "correct": true
+        },
+        {
+          "filename": "tyre_g04_view2.jpg",
+          "tyre_id": "tyre_g04",
+          "true_label": "good",
+          "pred_label": "good",
+          "confidence": 1.0,
+          "correct": true
+        },
+        {
+          "filename": "tyre_g04_view3.jpg",
+          "tyre_id": "tyre_g04",
+          "true_label": "good",
+          "pred_label": "good",
+          "confidence": 1.0,
+          "correct": true
+        },
+        {
+          "filename": "tyre_m02_view1.jpg",
+          "tyre_id": "tyre_m02",
+          "true_label": "moderate",
+          "pred_label": "moderate",
+          "confidence": 0.6065778650252391,
+          "correct": true
+        },
+        {
+          "filename": "tyre_m02_view2.jpg",
+          "tyre_id": "tyre_m02",
+          "true_label": "moderate",
+          "pred_label": "moderate",
+          "confidence": 0.5896178989851383,
+          "correct": true
+        },
+        {
+          "filename": "tyre_m02_view3.jpg",
+          "tyre_id": "tyre_m02",
+          "true_label": "moderate",
+          "pred_label": "worn",
+          "confidence": 0.6223709063586422,
+          "correct": false
+        },
+        {
+          "filename": "tyre_w03_view1.jpg",
+          "tyre_id": "tyre_w03",
+          "true_label": "worn",
+          "pred_label": "worn",
+          "confidence": 0.6534182908731986,
+          "correct": true
+        },
+        {
+          "filename": "tyre_w03_view2.jpg",
+          "tyre_id": "tyre_w03",
+          "true_label": "worn",
+          "pred_label": "worn",
+          "confidence": 0.8607998072244847,
+          "correct": true
+        },
+        {
+          "filename": "tyre_w03_view3.jpg",
+          "tyre_id": "tyre_w03",
+          "true_label": "worn",
+          "pred_label": "worn",
+          "confidence": 0.8673508258989743,
+          "correct": true
+        }
+      ]
+    }
+  },
+  "C (Wear-Only 6-D)": {
+    "rf": {
+      "holdout_acc": 1.0,
+      "macro_prec": 1.0,
+      "macro_rec": 1.0,
+      "macro_f1": 1.0,
+      "confusion_matrix": [
+        [
+          3,
+          0,
+          0
+        ],
+        [
+          0,
+          3,
+          0
+        ],
+        [
+          0,
+          0,
+          3
+        ]
+      ],
+      "report": {
+        "good": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "moderate": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "worn": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "accuracy": 1.0,
+        "macro avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 9.0
+        },
+        "weighted avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 9.0
+        }
+      },
+      "cv_accs": [
+        0.8888888888888888,
+        0.8888888888888888,
+        0.8888888888888888
+      ],
+      "cv_acc_mean": 0.8888888888888888,
+      "cv_acc_std": 0.0,
+      "cv_f1s": [
+        0.8857142857142857,
+        0.8857142857142857,
+        0.8857142857142857
+      ],
+      "cv_f1_mean": 0.8857142857142857,
+      "cv_f1_std": 0.0,
+      "sample_preds": [
+        {
+          "filename": "tyre_g04_view1.jpg",
+          "tyre_id": "tyre_g04",
+          "true_label": "good",
+          "pred_label": "good",
+          "confidence": 0.88,
+          "correct": true
+        },
+        {
+          "filename": "tyre_g04_view2.jpg",
+          "tyre_id": "tyre_g04",
+          "true_label": "good",
+          "pred_label": "good",
+          "confidence": 0.7,
+          "correct": true
+        },
+        {
+          "filename": "tyre_g04_view3.jpg",
+          "tyre_id": "tyre_g04",
+          "true_label": "good",
+          "pred_label": "good",
+          "confidence": 0.6866666666666666,
+          "correct": true
+        },
+        {
+          "filename": "tyre_m02_view1.jpg",
+          "tyre_id": "tyre_m02",
+          "true_label": "moderate",
+          "pred_label": "moderate",
+          "confidence": 0.76,
+          "correct": true
+        },
+        {
+          "filename": "tyre_m02_view2.jpg",
+          "tyre_id": "tyre_m02",
+          "true_label": "moderate",
+          "pred_label": "moderate",
+          "confidence": 0.7466666666666667,
+          "correct": true
+        },
+        {
+          "filename": "tyre_m02_view3.jpg",
+          "tyre_id": "tyre_m02",
+          "true_label": "moderate",
+          "pred_label": "moderate",
+          "confidence": 0.7933333333333333,
+          "correct": true
+        },
+        {
+          "filename": "tyre_w03_view1.jpg",
+          "tyre_id": "tyre_w03",
+          "true_label": "worn",
+          "pred_label": "worn",
+          "confidence": 0.84,
+          "correct": true
+        },
+        {
+          "filename": "tyre_w03_view2.jpg",
+          "tyre_id": "tyre_w03",
+          "true_label": "worn",
+          "pred_label": "worn",
+          "confidence": 1.0,
+          "correct": true
+        },
+        {
+          "filename": "tyre_w03_view3.jpg",
+          "tyre_id": "tyre_w03",
+          "true_label": "worn",
+          "pred_label": "worn",
+          "confidence": 0.9933333333333333,
+          "correct": true
+        }
+      ]
+    },
+    "svm": {
+      "holdout_acc": 1.0,
+      "macro_prec": 1.0,
+      "macro_rec": 1.0,
+      "macro_f1": 1.0,
+      "confusion_matrix": [
+        [
+          3,
+          0,
+          0
+        ],
+        [
+          0,
+          3,
+          0
+        ],
+        [
+          0,
+          0,
+          3
+        ]
+      ],
+      "report": {
+        "good": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "moderate": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "worn": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "accuracy": 1.0,
+        "macro avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 9.0
+        },
+        "weighted avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 9.0
+        }
+      },
+      "cv_accs": [
+        1.0,
+        1.0,
+        0.8888888888888888
+      ],
+      "cv_acc_mean": 0.9629629629629629,
+      "cv_acc_std": 0.05237828008789243,
+      "cv_f1s": [
+        1.0,
+        1.0,
+        0.8857142857142857
+      ],
+      "cv_f1_mean": 0.9619047619047619,
+      "cv_f1_std": 0.05387480237611792,
+      "sample_preds": [
+        {
+          "filename": "tyre_g04_view1.jpg",
+          "tyre_id": "tyre_g04",
+          "true_label": "good",
+          "pred_label": "good",
+          "confidence": 0.9418154973396645,
+          "correct": true
+        },
+        {
+          "filename": "tyre_g04_view2.jpg",
+          "tyre_id": "tyre_g04",
+          "true_label": "good",
+          "pred_label": "good",
+          "confidence": 0.9004004695089057,
+          "correct": true
+        },
+        {
+          "filename": "tyre_g04_view3.jpg",
+          "tyre_id": "tyre_g04",
+          "true_label": "good",
+          "pred_label": "good",
+          "confidence": 0.8931875869857872,
+          "correct": true
+        },
+        {
+          "filename": "tyre_m02_view1.jpg",
+          "tyre_id": "tyre_m02",
+          "true_label": "moderate",
+          "pred_label": "moderate",
+          "confidence": 0.8505616884670615,
+          "correct": true
+        },
+        {
+          "filename": "tyre_m02_view2.jpg",
+          "tyre_id": "tyre_m02",
+          "true_label": "moderate",
+          "pred_label": "moderate",
+          "confidence": 0.8568535452386811,
+          "correct": true
+        },
+        {
+          "filename": "tyre_m02_view3.jpg",
+          "tyre_id": "tyre_m02",
+          "true_label": "moderate",
+          "pred_label": "moderate",
+          "confidence": 0.8494405266401973,
+          "correct": true
+        },
+        {
+          "filename": "tyre_w03_view1.jpg",
+          "tyre_id": "tyre_w03",
+          "true_label": "worn",
+          "pred_label": "worn",
+          "confidence": 0.8783947175452268,
+          "correct": true
+        },
+        {
+          "filename": "tyre_w03_view2.jpg",
+          "tyre_id": "tyre_w03",
+          "true_label": "worn",
+          "pred_label": "worn",
+          "confidence": 0.9231419584403373,
+          "correct": true
+        },
+        {
+          "filename": "tyre_w03_view3.jpg",
+          "tyre_id": "tyre_w03",
+          "true_label": "worn",
+          "pred_label": "worn",
+          "confidence": 0.9250559620641607,
+          "correct": true
+        }
+      ]
+    },
+    "knn": {
+      "holdout_acc": 1.0,
+      "macro_prec": 1.0,
+      "macro_rec": 1.0,
+      "macro_f1": 1.0,
+      "confusion_matrix": [
+        [
+          3,
+          0,
+          0
+        ],
+        [
+          0,
+          3,
+          0
+        ],
+        [
+          0,
+          0,
+          3
+        ]
+      ],
+      "report": {
+        "good": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "moderate": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "worn": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "accuracy": 1.0,
+        "macro avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 9.0
+        },
+        "weighted avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 9.0
+        }
+      },
+      "cv_accs": [
+        1.0,
+        1.0,
+        0.8888888888888888
+      ],
+      "cv_acc_mean": 0.9629629629629629,
+      "cv_acc_std": 0.05237828008789243,
+      "cv_f1s": [
+        1.0,
+        1.0,
+        0.8857142857142857
+      ],
+      "cv_f1_mean": 0.9619047619047619,
+      "cv_f1_std": 0.05387480237611792,
+      "sample_preds": [
+        {
+          "filename": "tyre_g04_view1.jpg",
+          "tyre_id": "tyre_g04",
+          "true_label": "good",
+          "pred_label": "good",
+          "confidence": 0.6590531980497396,
+          "correct": true
+        },
+        {
+          "filename": "tyre_g04_view2.jpg",
+          "tyre_id": "tyre_g04",
+          "true_label": "good",
+          "pred_label": "good",
+          "confidence": 1.0,
+          "correct": true
+        },
+        {
+          "filename": "tyre_g04_view3.jpg",
+          "tyre_id": "tyre_g04",
+          "true_label": "good",
+          "pred_label": "good",
+          "confidence": 1.0,
+          "correct": true
+        },
+        {
+          "filename": "tyre_m02_view1.jpg",
+          "tyre_id": "tyre_m02",
+          "true_label": "moderate",
+          "pred_label": "moderate",
+          "confidence": 0.7781858860040497,
+          "correct": true
+        },
+        {
+          "filename": "tyre_m02_view2.jpg",
+          "tyre_id": "tyre_m02",
+          "true_label": "moderate",
+          "pred_label": "moderate",
+          "confidence": 1.0,
+          "correct": true
+        },
+        {
+          "filename": "tyre_m02_view3.jpg",
+          "tyre_id": "tyre_m02",
+          "true_label": "moderate",
+          "pred_label": "moderate",
+          "confidence": 0.814107916888842,
+          "correct": true
+        },
+        {
+          "filename": "tyre_w03_view1.jpg",
+          "tyre_id": "tyre_w03",
+          "true_label": "worn",
+          "pred_label": "worn",
+          "confidence": 0.7574796163186823,
+          "correct": true
+        },
+        {
+          "filename": "tyre_w03_view2.jpg",
+          "tyre_id": "tyre_w03",
+          "true_label": "worn",
+          "pred_label": "worn",
+          "confidence": 1.0,
+          "correct": true
+        },
+        {
+          "filename": "tyre_w03_view3.jpg",
+          "tyre_id": "tyre_w03",
+          "true_label": "worn",
+          "pred_label": "worn",
+          "confidence": 1.0,
+          "correct": true
+        }
+      ]
+    }
+  }
+}
