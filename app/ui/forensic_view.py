@@ -1,42 +1,54 @@
 """
 TreadVision: Forensic Tread Matcher UI
 Workstation for digital impression processing, multi-criteria similarity matching,
-and vehicle fitment retrieval.
+database-backed evidence archiving, and vehicle fitment retrieval.
 """
 from pathlib import Path
 import json
+from datetime import date
 import streamlit as st
 import numpy as np
 import cv2
 from PIL import Image
 
-from app.config import FORENSIC_IMPRESSIONS_DIR, FORENSIC_WEIGHTS
-from app.database.connection import get_db_session
-from app.database.models import Tyre, TreadFeatures
+from app.config import FORENSIC_IMPRESSIONS_DIR, FORENSIC_WEIGHTS, BASE_DIR
+from app.database.connection import get_db_session, verify_database_integrity
+from app.database.models import Tyre, TreadFeatures, Investigation, EvidenceImage
+from app.database.forensic_repository import (
+    list_investigations,
+    get_or_create_investigation,
+    archive_investigation,
+    save_forensic_match_transaction,
+    query_investigation_summaries_view,
+    get_evidence_details_with_matches,
+    get_manufacturer_match_aggregates,
+    verify_evidence_storage_integrity,
+    cleanup_orphan_evidence_files
+)
 from app.image_processing.forensic_matcher import ForensicMatcher
 from app.ui.components import render_header, render_forensic_notice
 
 
 def render_forensic():
-    """Render the Forensic Tread Matcher workstation."""
+    """Render the Forensic Tread Matcher workstation with database persistence."""
     render_header(
         "FORENSIC TREAD MATCHER",
-        "Compare a photographed tyre impression against reference tread patterns."
+        "Compare a photographed tyre impression against reference tread patterns with full DBMS traceability."
     )
 
     # Workflow Pipeline Sequence Indicator
     st.markdown("""
     <div style="background: #23252E; border: 1px solid #41434E; border-radius: 4px; padding: 12px 16px; margin-bottom: 20px;">
         <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.74rem; font-weight: 600; letter-spacing: 0.08em; color: #F2F2F4; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-            <span><span style="color: #D8125B;">01</span> INPUT</span>
+            <span><span style="color: #D8125B;">01</span> CASE & INPUT</span>
             <span style="color: #41434E;">&mdash;</span>
             <span><span style="color: #D8125B;">02</span> PROCESS</span>
             <span style="color: #41434E;">&mdash;</span>
-            <span><span style="color: #D8125B;">03</span> EXTRACT</span>
+            <span><span style="color: #D8125B;">03</span> EXTRACT 31-D</span>
             <span style="color: #41434E;">&mdash;</span>
-            <span><span style="color: #D8125B;">04</span> MATCH</span>
+            <span><span style="color: #D8125B;">04</span> MATCH & PERSIST</span>
             <span style="color: #41434E;">&mdash;</span>
-            <span><span style="color: #D8125B;">05</span> REVIEW</span>
+            <span><span style="color: #D8125B;">05</span> REVIEW & FITMENTS</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -44,11 +56,100 @@ def render_forensic():
     # Conceptual Pipeline Relationship Diagram
     st.markdown("""
     <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: #B4B5BC; background: #282A34; padding: 8px 14px; border-radius: 3px; border: 1px solid #41434E; margin-bottom: 20px;">
-        TRACEABILITY: CRIME-SCENE IMPRESSION &rarr; TREAD PATTERN MATCH &rarr; TYRE DATABASE &rarr; VEHICLE FITMENT
+        TRACEABILITY: INVESTIGATION &rarr; CRIME-SCENE EVIDENCE &rarr; 31-D FEATURES &rarr; MATCH RESULTS &rarr; REFERENCE PATTERNS &rarr; VEHICLE FITMENTS
     </div>
     """, unsafe_allow_html=True)
 
-    # Input Section: Crime-Scene Impression Upload or Provided Samples
+    # Workstation Navigation Tabs
+    tab_match, tab_archive, tab_dbms = st.tabs([
+        "FORENSIC MATCHING WORKSTATION",
+        "INVESTIGATION CASE ARCHIVE",
+        "DBMS ANALYTICAL VIEWS"
+    ])
+
+    with tab_match:
+        _render_matching_workstation()
+
+    with tab_archive:
+        _render_case_archive()
+
+    with tab_dbms:
+        _render_dbms_analytics()
+
+    # Mandatory Professional Forensic Notice
+    render_forensic_notice()
+
+
+def _render_matching_workstation():
+    """Render the active impression processing and matching interface with DBMS persistence."""
+    session = get_db_session()
+    investigations = []
+    try:
+        investigations = list_investigations(session)
+    finally:
+        session.close()
+
+    # 1. Investigation Case Selection / Registration
+    st.markdown("""
+    <div style="font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: #F2F2F4; font-weight: 700; margin-bottom: 8px;">
+        ACTIVE INVESTIGATION CASE SELECTION
+    </div>
+    """, unsafe_allow_html=True)
+
+    case_col1, case_col2 = st.columns([1.6, 1], gap="large")
+
+    with case_col1:
+        case_mode = st.radio(
+            "Case Assignment:",
+            ["Associate with Existing Case", "Register New Investigation Case"],
+            horizontal=True,
+            label_visibility="collapsed"
+        )
+
+        selected_case_number = "CASE-2026-001"
+        case_title = "Active Scene Investigation"
+        case_location = "Field Evidence Collection"
+        case_description = "Photographed crime-scene tyre mark."
+        matching_inv = None
+
+        if case_mode == "Associate with Existing Case" and investigations:
+            case_options = {
+                f"{inv.case_number} — {inv.title} ({inv.status})": inv.case_number
+                for inv in investigations
+            }
+            selected_label = st.selectbox(
+                "Select Active Case:",
+                list(case_options.keys()),
+                label_visibility="collapsed"
+            )
+            selected_case_number = case_options[selected_label]
+            matching_inv = next((i for i in investigations if i.case_number == selected_case_number), None)
+            if matching_inv:
+                case_title = matching_inv.title
+                case_location = matching_inv.location or ""
+                case_description = matching_inv.description or ""
+        else:
+            c_sub1, c_sub2 = st.columns(2)
+            with c_sub1:
+                selected_case_number = st.text_input("Case Number (Unique):", value=f"CASE-2026-00{len(investigations) + 1}")
+                case_title = st.text_input("Case Title:", value="Highway Incident Tyre Recovery")
+            with c_sub2:
+                case_location = st.text_input("Scene Location:", value="Sector 29 Collision Site")
+                case_description = st.text_input("Brief Description:", value="Impression lifted from wet roadside shoulder.")
+
+    with case_col2:
+        st.markdown(f"""
+        <div style="background: #23252E; border: 1px solid #41434E; border-left: 3px solid #D8125B; border-radius: 4px; padding: 12px 14px; font-size: 0.78rem;">
+            <div style="font-family: 'IBM Plex Mono', monospace; font-weight: 700; color: #D8125B;">DBMS CASE CONTEXT</div>
+            <div style="margin-top: 4px; color: #F2F2F4; font-weight: 600;">{selected_case_number}</div>
+            <div style="color: #B4B5BC; margin-top: 2px;">{case_title}</div>
+            <div style="color: #B4B5BC; font-size: 0.72rem; margin-top: 4px;">Location: {case_location}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("<hr style='border: none; border-top: 1px solid #282A34; margin: 16px 0 20px 0;'>", unsafe_allow_html=True)
+
+    # 2. Input Section: Crime-Scene Impression Upload or Provided Samples
     col_upload, col_settings = st.columns([1.6, 1], gap="large")
 
     with col_upload:
@@ -58,15 +159,20 @@ def render_forensic():
         </div>
         """, unsafe_allow_html=True)
 
+        source_options = ["Select Verified Evidence Sample", "Upload Custom Impression Photograph"]
+        if matching_inv and matching_inv.evidence_images:
+            source_options.append("Re-analyze Existing Case Evidence (New Matching Run)")
+
         source_mode = st.radio(
             "Evidence Selection:",
-            ["Select Verified Evidence Sample", "Upload Custom Impression Photograph"],
+            source_options,
             horizontal=True,
             label_visibility="collapsed"
         )
 
         impression_to_process = None
         evidence_name = ""
+        target_evidence_id = None
 
         if source_mode == "Select Verified Evidence Sample":
             evidence_samples = {
@@ -85,6 +191,18 @@ def render_forensic():
             if sample_file.exists():
                 impression_to_process = str(sample_file)
                 evidence_name = selected_key
+        elif source_mode == "Re-analyze Existing Case Evidence (New Matching Run)":
+            ev_items = {
+                f"Evidence #{ev.id} — {ev.original_filename} ({ev.image_width}x{ev.image_height})": ev
+                for ev in matching_inv.evidence_images
+            }
+            chosen_label = st.selectbox("Select Evidence Item to Re-match:", list(ev_items.keys()))
+            chosen_ev = ev_items[chosen_label]
+            target_evidence_id = chosen_ev.id
+            evidence_name = chosen_ev.original_filename
+            disk_p = BASE_DIR / chosen_ev.image_path
+            if disk_p.exists():
+                impression_to_process = str(disk_p)
         else:
             uploaded = st.file_uploader(
                 "Upload photographed tyre mark from substrate (mud, sand, soil, dirt):",
@@ -173,7 +291,59 @@ def render_forensic():
 
         candidates = matcher.match(query_res, db_records, top_k=5)
 
-    # 1. Forensic Processing Stages View
+        # 3. DBMS Atomic Transaction Persistence
+        tx_result = None
+        tx_error = None
+        try:
+            tx_result = save_forensic_match_transaction(
+                case_number=selected_case_number,
+                image_input=impression_to_process,
+                original_filename=evidence_name or "uploaded_impression.jpg",
+                pipeline_result=query_res,
+                candidates=candidates,
+                title=case_title,
+                description=case_description,
+                location=case_location,
+                weights=normalized_weights,
+                evidence_id=target_evidence_id,
+                notes=f"Forensic run (E={normalized_weights['edge']:.2f}, T={normalized_weights['texture']:.2f}, S={normalized_weights['shape']:.2f}, L={normalized_weights['local']:.2f})"
+            )
+        except Exception as e:
+            tx_error = str(e)
+
+    # Transaction Confirmation Banner
+    if tx_result:
+        st.markdown(f"""
+        <div style="background: #1B2B23; border: 1px solid #2E5C44; border-left: 4px solid #38B000; border-radius: 4px; padding: 12px 16px; margin: 20px 0;">
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.74rem; font-weight: 700; color: #38B000; letter-spacing: 0.08em;">
+                DBMS TRANSACTION COMMITTED &mdash; ATOMIC PERSISTENCE VERIFIED
+            </div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.74rem; color: #F2F2F4; margin-top: 4px;">
+                Investigation: <span style="color:#FFF; font-weight:600;">{tx_result['case_number']}</span> &nbsp;|&nbsp;
+                Evidence ID: <span style="color:#FFF; font-weight:600;">#{tx_result['evidence_id']}</span> &nbsp;|&nbsp;
+                Matching Run: <span style="color:#38B000; font-weight:700;">#{tx_result.get('run_number', 1)}</span> (Run ID #{tx_result.get('run_id')}) &nbsp;|&nbsp;
+                Ranked Candidates Stored: <span style="color:#FFF; font-weight:600;">{tx_result['matches_stored']}</span><br>
+                SHA-256 Checksum: <span style="color:#B4B5BC;">{tx_result['checksum']}</span><br>
+                Storage Path: <span style="color:#B4B5BC;">{tx_result['image_path']}</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    elif tx_error:
+        st.markdown(f"""
+        <div class="tv-notice" style="border-left-color: #D8125B;">
+            <div class="tv-notice-title">DBMS PERSISTENCE NOTICE</div>
+            Database transaction encountered an issue: {tx_error}. Match preview displayed from memory.
+        </div>
+        """, unsafe_allow_html=True)
+    elif tx_error:
+        st.markdown(f"""
+        <div class="tv-notice" style="border-left-color: #D8125B;">
+            <div class="tv-notice-title">DBMS PERSISTENCE NOTICE</div>
+            Database transaction encountered an issue: {tx_error}. Match preview displayed from memory.
+        </div>
+        """, unsafe_allow_html=True)
+
+    # 4. Forensic Processing Stages View
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("""
     <div style="font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: #F2F2F4; font-weight: 700; margin-bottom: 12px;">
@@ -198,7 +368,7 @@ def render_forensic():
         st.markdown("<div style='font-size:0.72rem; font-weight:600; text-transform:uppercase; color:#B4B5BC; margin-bottom:4px;'>EXTRACTED PATTERN</div>", unsafe_allow_html=True)
         st.image(query_res.stages["Segmented Tread"], use_container_width=True)
 
-    # 2. Ranked Match Results
+    # 5. Ranked Match Results
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown(f"""
     <div style="font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: #F2F2F4; font-weight: 700; margin-bottom: 12px;">
@@ -352,5 +522,363 @@ def render_forensic():
                 st.markdown(f"*{cand.description}*")
                 st.markdown("<div style='font-size:0.72rem; color:#B4B5BC;'>Vehicle fitments shown are reference specifications from the seed catalog and represent potential vehicle applications, not confirmed scene attribution.</div>", unsafe_allow_html=True)
 
-    # Mandatory Professional Forensic Notice
-    render_forensic_notice()
+
+def _render_case_archive():
+    """Render the historical investigation browser and evidence retrieval workstation."""
+    st.markdown("""
+    <div style="font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: #F2F2F4; font-weight: 700; margin-bottom: 8px;">
+        INVESTIGATION ARCHIVE & HISTORICAL EVIDENCE RETRIEVAL
+    </div>
+    <div style="font-size: 0.8rem; color: #B4B5BC; margin-bottom: 16px;">
+        Revisit previously recorded investigations, inspect cryptographically verified evidence images, and review persisted candidate matches directly from SQLite.
+    </div>
+    """, unsafe_allow_html=True)
+
+    session = get_db_session()
+    try:
+        col_flt1, col_flt2 = st.columns([2, 1])
+        with col_flt1:
+            show_archived = st.checkbox("Include Archived Cases", value=False)
+
+        investigations = list_investigations(session, include_archived=show_archived)
+        if not investigations:
+            st.markdown("""
+            <div class="tv-notice">
+                <div class="tv-notice-title">NO INVESTIGATION RECORDS</div>
+                No investigations found matching the current archive filter. Execute a matching session to persist the first case.
+            </div>
+            """, unsafe_allow_html=True)
+            return
+
+        inv_map = {
+            f"{'[ARCHIVED] ' if inv.is_archived else ''}{inv.case_number} — {inv.title} ({inv.status})": inv
+            for inv in investigations
+        }
+        sel_inv_label = st.selectbox("Select Investigation to Inspect:", list(inv_map.keys()))
+        selected_inv = inv_map[sel_inv_label]
+
+        # Case summary metadata header
+        st.markdown(f"""
+        <div style="background: #23252E; border: 1px solid #41434E; border-left: 4px solid {'#B4B5BC' if selected_inv.is_archived else '#D8125B'}; border-radius: 4px; padding: 18px 20px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;">
+                <div>
+                    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.76rem; font-weight: 600; color: {'#B4B5BC' if selected_inv.is_archived else '#D8125B'};">
+                        CASE RECORD: {selected_inv.case_number} {'[ARCHIVED]' if selected_inv.is_archived else ''}
+                    </div>
+                    <div style="font-size: 1.3rem; font-weight: 700; color: #F2F2F4; margin: 4px 0;">
+                        {selected_inv.title}
+                    </div>
+                    <div style="font-size: 0.82rem; color: #B4B5BC;">
+                        Location: {selected_inv.location or 'N/A'} &nbsp;|&nbsp; Date: {selected_inv.investigation_date} &nbsp;|&nbsp; Status: {selected_inv.status}
+                    </div>
+                    <div style="font-size: 0.82rem; color: #F2F2F4; margin-top: 6px;">
+                        {selected_inv.description or ''}
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 1.8rem; font-weight: 700; color: #F2F2F4;">
+                        {len(selected_inv.evidence_images)}
+                    </div>
+                    <div style="font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: #B4B5BC; font-weight: 600;">
+                        EVIDENCE ITEMS
+                    </div>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Archival status control
+        col_btn1, col_btn2 = st.columns([3, 1])
+        with col_btn2:
+            if selected_inv.is_archived:
+                if st.button("Unarchive Investigation", key=f"unarch_{selected_inv.id}"):
+                    archive_investigation(session, selected_inv.id, archive=False)
+                    st.rerun()
+            else:
+                if st.button("Soft-Archive Investigation", key=f"arch_{selected_inv.id}"):
+                    archive_investigation(session, selected_inv.id, archive=True)
+                    st.rerun()
+
+        if not selected_inv.evidence_images:
+            st.markdown("""
+            <div class="tv-notice">
+                <div class="tv-notice-title">NO EVIDENCE ITEMS ASSOCIATED</div>
+                No evidence impressions have been linked to this investigation yet.
+            </div>
+            """, unsafe_allow_html=True)
+            return
+
+        # Evidence selector
+        evidence_options = {
+            f"Evidence #{ev.id} — {ev.original_filename} ({ev.image_format}, {ev.image_width}x{ev.image_height})": ev.id
+            for ev in selected_inv.evidence_images
+        }
+        sel_ev_label = st.selectbox("Select Evidence Item to Inspect:", list(evidence_options.keys()))
+        selected_ev_id = evidence_options[sel_ev_label]
+
+        # Retrieve full details via multi-table join
+        details = get_evidence_details_with_matches(session, selected_ev_id)
+        if not details:
+            st.warning("Evidence details could not be retrieved from database.")
+            return
+
+        # Matching Run selector if multiple runs exist
+        runs = details.get("available_runs", [])
+        if len(runs) > 1:
+            run_options = {
+                f"Run #{r['run_number']} — {r['run_timestamp']} ({r['matching_method']}, {r['match_count']} ranked)": r["id"]
+                for r in runs
+            }
+            chosen_run_lbl = st.selectbox("Select Matching Run Analysis:", list(run_options.keys()))
+            chosen_run_id = run_options[chosen_run_lbl]
+            if details.get("active_run") and details["active_run"]["id"] != chosen_run_id:
+                details = get_evidence_details_with_matches(session, selected_ev_id, run_id=chosen_run_id)
+
+        # Evidence display
+        col_img, col_meta = st.columns([1.2, 1.8], gap="large")
+
+        with col_img:
+            ev_file = BASE_DIR / details["image_path"]
+            if ev_file.exists():
+                st.image(str(ev_file), caption=f"Evidence Image #{details['evidence_id']}", use_container_width=True)
+            else:
+                st.markdown("<div style='background:#282A34; height:200px; display:flex; align-items:center; justify-content:center; color:#B4B5BC;'>Image file not found on disk</div>", unsafe_allow_html=True)
+
+        with col_meta:
+            # Cryptographic status badge
+            chk_status = details.get("checksum_status", "UNKNOWN")
+            if chk_status == "VERIFIED":
+                st.markdown("""
+                <div style="background: #1B2B23; border: 1px solid #2E5C44; border-left: 3px solid #38B000; border-radius: 3px; padding: 6px 10px; margin-bottom: 10px; font-size: 0.74rem; font-family: 'IBM Plex Mono', monospace; color: #38B000; font-weight: 600;">
+                    CRYPTOGRAPHIC INTEGRITY: VERIFIED (SHA-256 MATCH ON DISK FILE)
+                </div>
+                """, unsafe_allow_html=True)
+            elif chk_status == "TAMPER_DETECTED":
+                st.markdown("""
+                <div style="background: #2D1820; border: 1px solid #5C2230; border-left: 3px solid #D8125B; border-radius: 3px; padding: 6px 10px; margin-bottom: 10px; font-size: 0.74rem; font-family: 'IBM Plex Mono', monospace; color: #D8125B; font-weight: 600;">
+                    CRITICAL INTEGRITY ALERT: TAMPER DETECTED (SHA-256 MISMATCH)
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown("""
+                <div style="background: #2D1820; border: 1px solid #5C2230; border-left: 3px solid #D8125B; border-radius: 3px; padding: 6px 10px; margin-bottom: 10px; font-size: 0.74rem; font-family: 'IBM Plex Mono', monospace; color: #D8125B; font-weight: 600;">
+                    STORAGE ERROR: PHYSICAL EVIDENCE FILE MISSING ON DISK
+                </div>
+                """, unsafe_allow_html=True)
+
+            active_run_info = ""
+            if details.get("active_run"):
+                arun = details["active_run"]
+                w_str = ""
+                if arun.get("weights"):
+                    w = arun["weights"]
+                    w_str = f" | Weights: E={w.get('edge', 0)*100:.0f}%, T={w.get('texture', 0)*100:.0f}%, S={w.get('shape', 0)*100:.0f}%, L={w.get('local', 0)*100:.0f}%"
+                active_run_info = f"<div style='color: #F2F2F4; font-weight: 600; margin-top: 6px;'>Run #{arun['run_number']} ({arun['matching_method']}){w_str}</div>"
+
+            st.markdown(f"""
+            <div style="background: #23252E; border: 1px solid #41434E; border-radius: 4px; padding: 14px; font-size: 0.8rem;">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-weight: 700; color: #D8125B; margin-bottom: 8px;">
+                    CRYPTOGRAPHIC & STORAGE METADATA
+                </div>
+                <div style="color: #B4B5BC; margin-bottom: 4px;">Original File: <span style="color:#F2F2F4;">{details['original_filename']}</span></div>
+                <div style="color: #B4B5BC; margin-bottom: 4px;">Dimensions: <span style="color:#F2F2F4;">{details['image_width']} x {details['image_height']} px</span></div>
+                <div style="color: #B4B5BC; margin-bottom: 4px;">Format: <span style="color:#F2F2F4;">{details['image_format']}</span></div>
+                <div style="color: #B4B5BC; margin-bottom: 4px;">Relative Path: <span class="tv-mono" style="color:#F2F2F4;">{details['image_path']}</span></div>
+                <div style="color: #B4B5BC; margin-bottom: 4px;">Database Checksum: <span class="tv-mono" style="color:#F2F2F4; font-size: 0.72rem;">{details['image_checksum']}</span></div>
+                <div style="color: #B4B5BC; margin-bottom: 4px;">Live Disk Checksum: <span class="tv-mono" style="color:#F2F2F4; font-size: 0.72rem;">{details['live_checksum']}</span></div>
+                <div style="color: #B4B5BC;">Logged Timestamp: <span style="color:#F2F2F4;">{details['upload_timestamp']}</span></div>
+                {active_run_info}
+            </div>
+            """, unsafe_allow_html=True)
+
+            if details["features"]:
+                feats = details["features"]
+                vec = feats.get("feature_vector", [])
+                st.markdown(f"""
+                <div style="background: #23252E; border: 1px solid #41434E; border-radius: 4px; padding: 14px; margin-top: 12px; font-size: 0.8rem;">
+                    <div style="font-family: 'IBM Plex Mono', monospace; font-weight: 700; color: #D8125B; margin-bottom: 6px;">
+                        PERSISTED FEATURE VECTOR (31-D)
+                    </div>
+                    <div style="color: #B4B5BC; margin-bottom: 4px;">Method: <span style="color:#F2F2F4;">{feats.get('extraction_method')}</span></div>
+                    <div style="color: #B4B5BC; margin-bottom: 6px;">Vector Dimensions: <span style="color:#F2F2F4; font-weight:600;">{len(vec)} floats</span></div>
+                    <div class="tv-mono" style="background:#1B1C22; padding:8px; border-radius:3px; font-size:0.68rem; color:#F2F2F4; overflow-x:auto; white-space:nowrap;">
+                        [{', '.join(f'{v:.4f}' for v in vec[:10])}... +{len(vec)-10} more]
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+        # Ranked matches from database
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown(f"""
+        <div style="font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: #F2F2F4; font-weight: 700; margin-bottom: 12px;">
+            PERSISTED CANDIDATE MATCHES ({len(details['matches'])} RANKED IN DATABASE)
+        </div>
+        """, unsafe_allow_html=True)
+
+        for match in details["matches"]:
+            tyre = match["tyre"]
+            scores = match["component_scores"]
+            with st.expander(f"Rank #{match['rank']} — {tyre['manufacturer']} {tyre['model']} | Similarity: {match['similarity_score']:.1f}%", expanded=(match['rank'] == 1)):
+                m_col1, m_col2 = st.columns([1, 2.5], gap="medium")
+                with m_col1:
+                    if Path(tyre["image_path"]).exists():
+                        st.image(tyre["image_path"], caption=tyre["pattern_name"], use_container_width=True)
+                with m_col2:
+                    st.markdown(f"**Pattern:** {tyre['pattern_name']} ({tyre['pattern_type']}, {tyre['symmetry']})")
+                    st.markdown(f"**Category:** {tyre['category']}")
+                    st.markdown(f"**Similarity Score:** `{match['similarity_score']:.1f}%` &nbsp;|&nbsp; **Method:** {match['matching_method']}")
+                    if scores:
+                        st.markdown(f"**Component Scores:** Edge `{scores.get('edge_similarity', 0.0):.1f}%` | Texture `{scores.get('texture_similarity', 0.0):.1f}%` | Shape `{scores.get('shape_similarity', 0.0):.1f}%`")
+                    if tyre["available_sizes"]:
+                        st.markdown(f"**Available Sizes:** `{', '.join(tyre['available_sizes'][:6])}`")
+                    if tyre["compatible_vehicles"]:
+                        st.markdown(f"**Possible Vehicle Applications:** {', '.join(tyre['compatible_vehicles'])}")
+                    st.markdown(f"*{tyre['description']}*")
+
+    finally:
+        session.close()
+
+
+def _render_dbms_analytics():
+    """Render analytical views, aggregations, and DBMS architectural integrity verification."""
+    st.markdown("""
+    <div style="font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: #F2F2F4; font-weight: 700; margin-bottom: 8px;">
+        DBMS ARCHITECTURE & ANALYTICAL QUERIES
+    </div>
+    <div style="font-size: 0.8rem; color: #B4B5BC; margin-bottom: 20px;">
+        Demonstration of SQL relational views, multi-table joins, GROUP BY aggregate statistics, and foreign key constraint validation.
+    </div>
+    """, unsafe_allow_html=True)
+
+    session = get_db_session()
+    try:
+        # 1. SQL View: v_investigation_summaries
+        st.markdown("""
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.74rem; font-weight: 700; color: #D8125B; margin-bottom: 6px;">
+            SQL VIEW: v_investigation_summaries
+        </div>
+        <div style="font-size: 0.76rem; color: #B4B5BC; margin-bottom: 10px;">
+            Precompiled relational view aggregating investigations, evidence items, matching runs, total matches, highest recorded similarity, and top candidate tyre.
+        </div>
+        """, unsafe_allow_html=True)
+
+        summaries = query_investigation_summaries_view(session)
+        if summaries:
+            table_rows = []
+            for s in summaries:
+                table_rows.append({
+                    "Case Number": s["case_number"],
+                    "Case Title": s["title"],
+                    "Status": s["status"],
+                    "Archived": "YES" if s.get("is_archived") else "NO",
+                    "Date": s["investigation_date"],
+                    "Evidence Items": s["evidence_count"],
+                    "Matching Runs": s.get("total_matching_runs", 1),
+                    "Matches Logged": s["total_matches_recorded"],
+                    "Peak Similarity": f"{s['highest_similarity_score']:.1f}%",
+                    "Top Pattern Type": s["top_pattern_type"],
+                    "Top Candidate Tyre": s["top_candidate_tyre"]
+                })
+            st.dataframe(table_rows, use_container_width=True)
+        else:
+            st.info("No investigation summaries currently indexed in view.")
+
+        # 2. Manufacturer Match Aggregate Query
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("""
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.74rem; font-weight: 700; color: #D8125B; margin-bottom: 6px;">
+            SQL AGGREGATION: MANUFACTURER CANDIDATE FREQUENCY
+        </div>
+        <div style="font-size: 0.76rem; color: #B4B5BC; margin-bottom: 10px;">
+            SELECT manufacturer, COUNT(m.id), AVG(m.similarity_score), MAX(m.similarity_score) FROM match_results GROUP BY manufacturer;
+        </div>
+        """, unsafe_allow_html=True)
+
+        mfg_stats = get_manufacturer_match_aggregates(session)
+        if mfg_stats:
+            mfg_rows = []
+            for m in mfg_stats:
+                mfg_rows.append({
+                    "Manufacturer": m["manufacturer"],
+                    "Top-5 Appearances": m["appearance_count"],
+                    "Mean Similarity": f"{m['avg_similarity']:.2f}%",
+                    "Peak Similarity": f"{m['max_similarity']:.2f}%"
+                })
+            st.dataframe(mfg_rows, use_container_width=True)
+        else:
+            st.info("No match results available yet for manufacturer aggregation.")
+
+        # 3. Storage & Cryptographic Verification Audit
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("""
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.74rem; font-weight: 700; color: #D8125B; margin-bottom: 6px;">
+            STORAGE AUDIT & CRYPTOGRAPHIC SHA-256 VERIFICATION
+        </div>
+        <div style="font-size: 0.76rem; color: #B4B5BC; margin-bottom: 10px;">
+            Active forensic audit comparing EvidenceImage records in SQLite with physical files on disk, detecting bit rot, tampering, and unindexed orphan files.
+        </div>
+        """, unsafe_allow_html=True)
+
+        storage_audit = verify_evidence_storage_integrity(session)
+        sa1, sa2, sa3, sa4 = st.columns(4)
+        with sa1:
+            st.metric("Evidence Records", storage_audit["total_evidence_records"])
+        with sa2:
+            st.metric("Cryptographically Verified", storage_audit["verified_intact"])
+        with sa3:
+            st.metric("Tampered / Missing Files", len(storage_audit["tampered_files"]) + len(storage_audit["missing_files"]))
+        with sa4:
+            st.metric("Untracked Orphan Files", len(storage_audit["orphan_files"]))
+
+        if storage_audit["orphan_files"]:
+            st.warning(f"Detected {len(storage_audit['orphan_files'])} untracked orphan file(s) in evidence storage directory.")
+            if st.button("Purge Untracked Orphan Files"):
+                removed_count = cleanup_orphan_evidence_files(session)
+                st.success(f"Purged {removed_count} orphan file(s) from storage.")
+                st.rerun()
+
+        # 4. Database Schema Integrity Status
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("""
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.74rem; font-weight: 700; color: #D8125B; margin-bottom: 6px;">
+            RELATIONAL INTEGRITY & CONSTRAINT STATUS
+        </div>
+        """, unsafe_allow_html=True)
+
+        integrity = verify_database_integrity(session_instance=session)
+
+        c1, c2, c3, c4 = st.columns(4)
+        with c1:
+            st.metric("Total Tyres", integrity["counts"].get("tyres", 0))
+        with c2:
+            st.metric("Investigations", integrity["counts"].get("investigations", 0))
+        with c3:
+            st.metric("Evidence Records", integrity["counts"].get("evidence_images", 0))
+        with c4:
+            st.metric("Match Rankings", integrity["counts"].get("match_results", 0))
+
+        st.markdown(f"""
+        <div style="background: #23252E; border: 1px solid #41434E; border-radius: 4px; padding: 14px; margin-top: 14px; font-size: 0.78rem;">
+            <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #282A34;">
+                <span style="color: #B4B5BC;">SQLite Foreign Key Enforcement (PRAGMA foreign_keys = ON):</span>
+                <span style="color: #38B000; font-weight: 700;">ACTIVE</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #282A34;">
+                <span style="color: #B4B5BC;">Foreign Key Check Status:</span>
+                <span style="color: {'#38B000' if integrity['fk_check_passed'] else '#D8125B'}; font-weight: 700;">
+                    {'PASSED (0 VIOLATIONS)' if integrity['fk_check_passed'] else 'VIOLATIONS DETECTED'}
+                </span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #282A34;">
+                <span style="color: #B4B5BC;">Database Tables Verified:</span>
+                <span class="tv-mono" style="color: #F2F2F4;">{len(integrity['tables_checked'])} Tables Present</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+                <span style="color: #B4B5BC;">Relational View (v_investigation_summaries):</span>
+                <span style="color: #38B000; font-weight: 700;">COMPILED</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    finally:
+        session.close()

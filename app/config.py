@@ -16,6 +16,8 @@ RAW_DATA_DIR = DATA_DIR / "raw"
 WEAR_DATA_DIR = RAW_DATA_DIR / "tyre_wear"
 FORENSIC_IMPRESSIONS_DIR = RAW_DATA_DIR / "forensic" / "impressions"
 REFERENCE_PATTERNS_DIR = RAW_DATA_DIR / "forensic" / "reference_patterns"
+EVIDENCE_UPLOADS_DIR = RAW_DATA_DIR / "forensic" / "evidence_uploads"
+EVIDENCE_UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 
 # Image Processing Defaults
 DEFAULT_IMAGE_SIZE = (512, 512)

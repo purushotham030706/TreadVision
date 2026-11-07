@@ -5,12 +5,16 @@ vehicle fitments, and precomputed computer vision reference features.
 """
 import json
 from pathlib import Path
+from datetime import date
 from typing import Optional
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.config import REFERENCE_PATTERNS_DIR
 from app.database.connection import SessionLocal, init_db, verify_database_integrity
-from app.database.models import Tyre, TreadPattern, TyreSize, Vehicle, Fitment, TreadFeatures
+from app.database.models import (
+    Tyre, TreadPattern, TyreSize, Vehicle, Fitment, TreadFeatures,
+    Investigation, EvidenceImage, EvidenceFeatures, MatchResult
+)
 from app.image_processing.pipeline import ImageProcessingPipeline
 from app.image_processing.feature_fusion import FEATURE_NAMES
 
@@ -207,6 +211,10 @@ def seed_database(
                 return
 
         if force_reseed:
+            session.query(MatchResult).delete()
+            session.query(EvidenceFeatures).delete()
+            session.query(EvidenceImage).delete()
+            session.query(Investigation).delete()
             session.query(Fitment).delete()
             session.query(TreadFeatures).delete()
             session.query(TyreSize).delete()
@@ -333,6 +341,10 @@ def seed_database(
                     session.add(fitment)
                     existing_fitment_keys.add(f_key)
 
+        # Seed initial demonstration investigation if none exists
+        if session.query(Investigation).count() == 0:
+            seed_demo_investigation(session=session)
+
         session.commit()
     except Exception as e:
         session.rollback()
@@ -341,6 +353,69 @@ def seed_database(
     finally:
         if should_close:
             session.close()
+
+
+def seed_demo_investigation(session: Session) -> Optional[Investigation]:
+    """Seed an authentic reference investigation case with demonstration evidence if empty."""
+    from app.config import FORENSIC_IMPRESSIONS_DIR
+    from app.database.forensic_repository import save_forensic_match_transaction
+    from app.image_processing.forensic_matcher import ForensicMatcher
+
+    if session.query(Investigation).count() > 0:
+        return session.query(Investigation).first()
+
+    sample_img = FORENSIC_IMPRESSIONS_DIR / "impression_crime_scene_01_mud_michelin.jpg"
+    if not sample_img.exists():
+        inv = Investigation(
+            case_number="CASE-2026-001",
+            title="State Highway 48 Forensic Collision Investigation",
+            investigation_date=date(2026, 10, 24),
+            description="Forensic tyre impression recovered from mud substrate along north verge.",
+            location="SH-48 Km Post 32, Pune Corridor",
+            status="Active"
+        )
+        session.add(inv)
+        session.flush()
+        return inv
+
+    matcher = ForensicMatcher()
+    pipe_res = matcher.process_impression(str(sample_img))
+
+    tyres = session.query(Tyre).all()
+    db_records = []
+    for t in tyres:
+        if t.features and t.tread_pattern:
+            db_records.append({
+                "id": t.id,
+                "manufacturer": t.manufacturer,
+                "model": t.model,
+                "pattern_name": t.pattern_name,
+                "pattern_type": t.tread_pattern.pattern_type,
+                "symmetry": t.tread_pattern.symmetry,
+                "image_path": t.tread_pattern.image_path,
+                "features": {
+                    "edge": json.loads(t.features.edge_features),
+                    "texture": json.loads(t.features.texture_features),
+                    "shape": json.loads(t.features.shape_features),
+                },
+                "sizes": [s.formatted_size for s in t.sizes],
+                "vehicles": [f"{f.vehicle.manufacturer} {f.vehicle.model}" for f in t.fitments if f.vehicle],
+                "description": t.description
+            })
+    candidates = matcher.match(pipe_res, db_records, top_k=5)
+
+    save_forensic_match_transaction(
+        case_number="CASE-2026-001",
+        image_input=str(sample_img),
+        original_filename=sample_img.name,
+        pipeline_result=pipe_res,
+        candidates=candidates,
+        title="State Highway 48 Forensic Collision Investigation",
+        description="Forensic tyre impression recovered from mud substrate along north verge.",
+        location="SH-48 Km Post 32, Pune Corridor",
+        session_instance=session
+    )
+    return session.query(Investigation).filter(Investigation.case_number == "CASE-2026-001").first()
 
 
 if __name__ == "__main__":
